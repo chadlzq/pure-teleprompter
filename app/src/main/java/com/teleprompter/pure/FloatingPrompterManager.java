@@ -16,7 +16,9 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.lzf.easyfloat.EasyFloat;
 import com.lzf.easyfloat.enums.ShowPattern;
 import com.lzf.easyfloat.enums.SidePattern;
+import com.lzf.easyfloat.permission.PermissionUtils;
 import com.lzf.easyfloat.interfaces.OnPermissionResult;
+import com.lzf.easyfloat.interfaces.OnInvokeView;
 import com.teleprompter.pure.database.ScriptEntity;
 import com.teleprompter.pure.ui.SmoothTextScrollView;
 
@@ -56,8 +58,8 @@ public class FloatingPrompterManager {
 
     public void showPrompter(Activity activity, ScriptEntity script) {
         this.mCurrentScript = script;
-        if (!EasyFloat.checkPermission(activity)) {
-            EasyFloat.requestPermission(activity, new OnPermissionResult() {
+        if (!PermissionUtils.checkPermission(activity)) {
+            PermissionUtils.requestPermission(activity, new OnPermissionResult() {
                 @Override
                 public void permissionResult(boolean isOpen) {
                     if (isOpen) {
@@ -77,9 +79,12 @@ public class FloatingPrompterManager {
                 .setTag(FLOAT_TAG)
                 .setShowPattern(ShowPattern.ALL_TIME)
                 .setSidePattern(SidePattern.RESULT_HORIZONTAL)
-                .setLayout(com.teleprompter.pure.R.layout.float_window_modern, view -> {
-                    mRootFloatView = view;
-                    bindViewEvents(activity, view);
+                .setLayout(com.teleprompter.pure.R.layout.float_window_modern, new OnInvokeView() {
+                    @Override
+                    public void invoke(View view) {
+                        mRootFloatView = view;
+                        bindViewEvents(activity, view);
+                    }
                 })
                 .show();
     }

@@ -39,4 +39,5 @@ dependencies {
 
     // 悬浮窗框架 (EasyFloat 华米OV国产机型自适应)
     implementation 'com.github.princekin-f:EasyFloat:2.0.4'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.9.22'
 }
