@@ -7,26 +7,21 @@ import android.os.CountDownTimer;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.MotionEvent;
-import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
-import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
 /**
- * 极简平滑滚屏控件 (SmoothTextScrollView)
- * 提取自成熟提词器 App 并重构，无任何冗余海外依赖，完美适配中国大陆 Android 各种机型。
- * 
- * 核心特性：
- * 1. 恒定速度平滑滚动 (基于 ValueAnimator / 16ms 步进)
- * 2. 【台词手动滑动定位】：支持随时手势滑屏跳转任意台词，松手后无缝续播或暂停就位
- * 3. 【一键重置归零】：支持平滑或瞬间回到台词首句 (Reset to Beginning)
- * 4. 【专属细节】：支持动态切换文字对齐方式 (左对齐 / 居中对齐 / 右对齐)
- * 5. 【新增】：光学分光镜镜像模式 (水平翻转 setMirror)
- * 6. 【新增】：高对比度文字调色板 (白 / 黄 / 绿 / 蓝)
- * 7. 【新增】：3-2-1 启动倒计时联动控制
+ * 极致平滑提词器滚动控件 (SmoothTextScrollView)
+ * 融合成熟工业级提词器交互核心：
+ * 1. 【60FPS 无感匀速滚屏】：基于 16ms 步进累加器 (Frame-paced Accumulator)，杜绝掉帧与速度畸变
+ * 2. 【零手势冲突拖拽跟读】：用户随时可用手指上下拖动台词快速跳转，松手后无缝顺延跟读
+ * 3. 【一键重置归零】：支持瞬时或减速平滑回到台词首句
+ * 4. 【分光镜镜像翻转】：支持水平镜像模式 (setMirror)，适配专业分光提词玻璃
+ * 5. 【高对比度文字与行间距】：专为真人口播跟读优化的文字大行距与颜色调配
+ * 6. 【3-2-1 启动倒计时联动】
  */
 public class SmoothTextScrollView extends ScrollView {
 
@@ -43,24 +38,54 @@ public class SmoothTextScrollView extends ScrollView {
     }
 
     private TextView mInnerTextView;
-    private ValueAnimator mScrollAnimator;
     private OnPrompterStateListener mStateListener;
     private CountDownTimer mCountDownTimer;
-    
+
     // 控制参数
     private int mScrollSpeed = 30; // 滚动速度 (像素/秒)
     private boolean mIsPlaying = false;
     private boolean mIsUserTouching = false;
     private int mCurrentAlignment = ALIGN_LEFT;
-    private boolean mIsMirror = false; // 是否开启光学分光镜镜像模式
-    private int mCountdownSeconds = 3;  // 默认 3 秒倒计时 (0 为关闭倒计时)
+    private boolean mIsMirror = false;
+    private int mCountdownSeconds = 3; // 默认 3 秒倒计时
     private boolean mIsCountingDown = false;
 
-    // 手势识别辅助 (区分是轻触点击还是滑动拖拽)
-    private float mTouchDownY = 0f;
-    private float mTouchDownX = 0f;
-    private int mTouchSlop;
-    private boolean mHasMoved = false;
+    // 16ms 步进滚动引擎
+    private static final int FRAME_INTERVAL_MS = 16;
+    private float mAccumulatedPixels = 0f;
+    private final Runnable mScrollRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (!mIsPlaying || mIsCountingDown) {
+                return;
+            }
+
+            int maxY = getMaxScrollY();
+            if (maxY <= 0 || getScrollY() >= maxY) {
+                // 已滚动到底部，自动暂停
+                pauseScroll();
+                return;
+            }
+
+            if (!mIsUserTouching) {
+                // 计算当前 16ms 帧应滚动的浮点像素量
+                float pixelsThisFrame = (mScrollSpeed * FRAME_INTERVAL_MS) / 1000f;
+                mAccumulatedPixels += pixelsThisFrame;
+
+                if (mAccumulatedPixels >= 1.0f) {
+                    int dy = (int) mAccumulatedPixels;
+                    mAccumulatedPixels -= dy;
+                    scrollBy(0, dy);
+
+                    if (mStateListener != null) {
+                        mStateListener.onScrollPositionChanged(getScrollY(), maxY);
+                    }
+                }
+            }
+
+            postDelayed(this, FRAME_INTERVAL_MS);
+        }
+    };
 
     public SmoothTextScrollView(Context context) {
         this(context, null);
@@ -79,12 +104,10 @@ public class SmoothTextScrollView extends ScrollView {
         setVerticalScrollBarEnabled(false);
         setOverScrollMode(OVER_SCROLL_NEVER);
 
-        mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
-
         mInnerTextView = new TextView(context);
         mInnerTextView.setTextColor(Color.WHITE);
         mInnerTextView.setTextSize(22f); // 默认 22sp
-        mInnerTextView.setLineSpacing(12f, 1.2f); // 增大行距，便于口播跟读
+        mInnerTextView.setLineSpacing(12f, 1.25f); // 增大行距，便于口播跟读
         
         // 默认左对齐
         setTextAlignmentMode(ALIGN_LEFT);
@@ -93,8 +116,10 @@ public class SmoothTextScrollView extends ScrollView {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
         );
-        int paddingVertical = dp2px(120);
-        int paddingHorizontal = dp2px(16);
+        
+        // 上下增加足够 padding，确保首句和末句均能滚动到正中参考线
+        int paddingVertical = dp2px(110);
+        int paddingHorizontal = dp2px(14);
         mInnerTextView.setPadding(paddingHorizontal, paddingVertical, paddingHorizontal, paddingVertical);
 
         addView(mInnerTextView, lp);
@@ -105,8 +130,7 @@ public class SmoothTextScrollView extends ScrollView {
     }
 
     /**
-     * 【进阶功能 1】：光学分光镜镜像翻转模式
-     * 水平翻转文字，配合专业提词器分光玻璃反射使用
+     * 光学分光镜水平镜像翻转
      */
     public void setMirror(boolean mirror) {
         this.mIsMirror = mirror;
@@ -124,7 +148,7 @@ public class SmoothTextScrollView extends ScrollView {
     }
 
     /**
-     * 【进阶功能 2】：文字颜色切换 (高对比度调色板)
+     * 文字颜色设置
      */
     public void setTextColor(int color) {
         if (mInnerTextView != null) {
@@ -133,7 +157,7 @@ public class SmoothTextScrollView extends ScrollView {
     }
 
     /**
-     * 【进阶功能 3】：设置倒计时秒数 (0: 关闭, 3: 3秒, 5: 5秒)
+     * 倒计时秒数
      */
     public void setCountdownSeconds(int seconds) {
         this.mCountdownSeconds = Math.max(0, seconds);
@@ -148,7 +172,7 @@ public class SmoothTextScrollView extends ScrollView {
     }
 
     /**
-     * 设置文字对齐方式 (左 / 中 / 右)
+     * 设置文字对齐方式
      */
     public void setTextAlignmentMode(int alignmentMode) {
         mCurrentAlignment = alignmentMode;
@@ -166,12 +190,6 @@ public class SmoothTextScrollView extends ScrollView {
                 mInnerTextView.setGravity(Gravity.START);
                 break;
         }
-    }
-
-    public int toggleNextAlignment() {
-        int nextMode = (mCurrentAlignment + 1) % 3;
-        setTextAlignmentMode(nextMode);
-        return nextMode;
     }
 
     public int getCurrentAlignment() {
@@ -193,9 +211,6 @@ public class SmoothTextScrollView extends ScrollView {
 
     public void setScrollSpeed(int speed) {
         mScrollSpeed = Math.max(5, speed);
-        if (mIsPlaying && !mIsUserTouching && !mIsCountingDown) {
-            startScrollInternal();
-        }
     }
 
     public int getScrollSpeed() {
@@ -203,7 +218,7 @@ public class SmoothTextScrollView extends ScrollView {
     }
 
     /**
-     * 外部启动滚屏入口：智能判断是否先执行 3-2-1 倒计时
+     * 启动滚屏：在顶部时若开启倒计时则先倒计时
      */
     public void startScroll() {
         if (mCountdownSeconds > 0 && !mIsPlaying && getScrollY() == 0) {
@@ -213,9 +228,6 @@ public class SmoothTextScrollView extends ScrollView {
         }
     }
 
-    /**
-     * 执行 3-2-1 倒计时
-     */
     private void startCountdownThenScroll() {
         cancelCountdown();
         mIsCountingDown = true;
@@ -254,37 +266,11 @@ public class SmoothTextScrollView extends ScrollView {
         }
     }
 
-    /**
-     * 底层匀速平滑滚屏
-     */
     private void startScrollInternal() {
         mIsPlaying = true;
-        if (mScrollAnimator != null) {
-            mScrollAnimator.cancel();
-        }
-
-        int currentY = getScrollY();
-        int totalHeight = mInnerTextView.getHeight() - getHeight();
-        if (totalHeight <= 0) return;
-
-        int remainingDistance = totalHeight - currentY;
-        if (remainingDistance <= 0) return;
-
-        long duration = (long) ((remainingDistance / (float) mScrollSpeed) * 1000);
-
-        mScrollAnimator = ValueAnimator.ofInt(currentY, totalHeight);
-        mScrollAnimator.setDuration(Math.max(500, duration));
-        mScrollAnimator.setInterpolator(new LinearInterpolator());
-        mScrollAnimator.addUpdateListener(animation -> {
-            if (!mIsUserTouching) {
-                int y = (int) animation.getAnimatedValue();
-                scrollTo(0, y);
-                if (mStateListener != null) {
-                    mStateListener.onScrollPositionChanged(y, totalHeight);
-                }
-            }
-        });
-        mScrollAnimator.start();
+        mAccumulatedPixels = 0f;
+        removeCallbacks(mScrollRunnable);
+        post(mScrollRunnable);
 
         if (mStateListener != null) {
             mStateListener.onPlayStateChanged(true);
@@ -294,9 +280,8 @@ public class SmoothTextScrollView extends ScrollView {
     public void pauseScroll() {
         cancelCountdown();
         mIsPlaying = false;
-        if (mScrollAnimator != null) {
-            mScrollAnimator.cancel();
-        }
+        removeCallbacks(mScrollRunnable);
+
         if (mStateListener != null) {
             mStateListener.onPlayStateChanged(false);
         }
@@ -316,13 +301,13 @@ public class SmoothTextScrollView extends ScrollView {
     }
 
     /**
-     * 一键重置回到首句
+     * 重置回到台词开头首句
      */
     public void resetToStart(boolean smooth) {
         pauseScroll();
         if (smooth && getScrollY() > 0) {
             ValueAnimator resetAnim = ValueAnimator.ofInt(getScrollY(), 0);
-            resetAnim.setDuration(300);
+            resetAnim.setDuration(280);
             resetAnim.setInterpolator(new DecelerateInterpolator());
             resetAnim.addUpdateListener(a -> scrollTo(0, (int) a.getAnimatedValue()));
             resetAnim.start();
@@ -332,8 +317,31 @@ public class SmoothTextScrollView extends ScrollView {
 
         if (mStateListener != null) {
             mStateListener.onReset();
-            mStateListener.onScrollPositionChanged(0, getMaxScrollAmount());
+            mStateListener.onScrollPositionChanged(0, getMaxScrollY());
         }
+    }
+
+    /**
+     * 跳到下一行 (Line Skip Forward)
+     */
+    public void skipNextLine() {
+        int lineHeight = mInnerTextView.getLineHeight();
+        int targetY = Math.min(getScrollY() + lineHeight, getMaxScrollY());
+        smoothScrollTo(0, targetY);
+    }
+
+    /**
+     * 跳到上一行 (Line Skip Backward)
+     */
+    public void skipPreviousLine() {
+        int lineHeight = mInnerTextView.getLineHeight();
+        int targetY = Math.max(getScrollY() - lineHeight, 0);
+        smoothScrollTo(0, targetY);
+    }
+
+    public int getMaxScrollY() {
+        if (mInnerTextView == null) return 0;
+        return Math.max(0, mInnerTextView.getHeight() - getHeight());
     }
 
     @Override
@@ -341,41 +349,19 @@ public class SmoothTextScrollView extends ScrollView {
         switch (ev.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 mIsUserTouching = true;
-                mTouchDownX = ev.getX();
-                mTouchDownY = ev.getY();
-                mHasMoved = false;
                 if (mIsCountingDown) {
                     cancelCountdown();
                 }
-                if (mScrollAnimator != null && mScrollAnimator.isRunning()) {
-                    mScrollAnimator.cancel();
-                }
                 break;
-
-            case MotionEvent.ACTION_MOVE:
-                float dx = Math.abs(ev.getX() - mTouchDownX);
-                float dy = Math.abs(ev.getY() - mTouchDownY);
-                if (dx > mTouchSlop || dy > mTouchSlop) {
-                    mHasMoved = true;
-                }
-                break;
-
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 mIsUserTouching = false;
-                if (!mHasMoved) {
-                    togglePlayPause();
-                } else {
-                    if (mIsPlaying) {
-                        startScrollInternal();
-                    } else {
-                        if (mStateListener != null) {
-                            mStateListener.onScrollPositionChanged(getScrollY(), getMaxScrollAmount());
-                        }
-                    }
+                if (mStateListener != null) {
+                    mStateListener.onScrollPositionChanged(getScrollY(), getMaxScrollY());
                 }
                 break;
         }
+        // 交由原生 ScrollView 负责流畅的手指滑动定位
         return super.onTouchEvent(ev);
     }
 
