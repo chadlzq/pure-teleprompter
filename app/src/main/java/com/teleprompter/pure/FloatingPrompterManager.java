@@ -242,7 +242,7 @@ public class FloatingPrompterManager {
                     case MotionEvent.ACTION_DOWN:
                         startRawX = event.getRawX();
                         startRawY = event.getRawY();
-                        helper = FloatingWindowManager.getHelper(FLOAT_TAG);
+                        helper = FloatingWindowManager.INSTANCE.getHelper(FLOAT_TAG);
                         if (helper != null && helper.getParams() != null) {
                             startWindowX = helper.getParams().x;
                             startWindowY = helper.getParams().y;
@@ -344,7 +344,7 @@ public class FloatingPrompterManager {
                         startTouchX = event.getRawX();
                         startTouchY = event.getRawY();
                         isDragged = false;
-                        helper = FloatingWindowManager.getHelper(FLOAT_TAG);
+                        helper = FloatingWindowManager.INSTANCE.getHelper(FLOAT_TAG);
                         if (helper != null && helper.getParams() != null) {
                             startWindowX = helper.getParams().x;
                             startWindowY = helper.getParams().y;
