@@ -20,6 +20,9 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
+    - name: 配置 Gradle 环境与缓存加速
+      uses: gradle/actions/setup-gradle@v3
+
     - name: 自动初始化 Gradle Wrapper 构建引擎
       run: |
         gradle wrapper --gradle-version 8.2
