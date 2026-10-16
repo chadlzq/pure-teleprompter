@@ -116,21 +116,6 @@
             android:layout_height="1dp"
             android:layout_weight="1" />
 
-        <!-- 【新增】：一键导入 TXT 文件 -->
-        <TextView
-            android:id="@+id/btn_import_txt"
-            android:layout_width="wrap_content"
-            android:layout_height="28dp"
-            android:layout_marginEnd="6dp"
-            android:background="@drawable/bg_segmented_capsule"
-            android:gravity="center"
-            android:paddingHorizontal="9dp"
-            android:text="📂 导入TXT"
-            android:textColor="#E0E0E0"
-            android:textSize="11sp"
-            android:clickable="true"
-            android:focusable="true" />
-
         <!-- 一键从剪贴板粘贴按钮 -->
         <LinearLayout
             android:id="@+id/btn_paste_clipboard"
@@ -179,7 +164,7 @@
         android:layout_height="0dp"
         android:fillViewport="true"
         android:scrollbars="vertical"
-        app:layout_constraintBottom_toTopOf="@id/bottom_save_status_bar"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbar_stats">
 
         <EditText
@@ -198,31 +183,5 @@
             android:textColorHint="#4DFFFFFF"
             android:textSize="17sp" />
     </ScrollView>
-
-    <!-- 底部状态指示栏 -->
-    <LinearLayout
-        android:id="@+id/bottom_save_status_bar"
-        android:layout_width="match_parent"
-        android:layout_height="36dp"
-        android:background="#14161F"
-        android:gravity="center"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent">
-
-        <View
-            android:id="@+id/dot_save_status"
-            android:layout_width="6dp"
-            android:layout_height="6dp"
-            android:layout_marginEnd="6dp"
-            android:background="@drawable/bg_btn_accent_pill" />
-
-        <TextView
-            android:id="@+id/tv_save_status"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="本地数据库已同步 (自动保存)"
-            android:textColor="#80FFFFFF"
-            android:textSize="11sp" />
-    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

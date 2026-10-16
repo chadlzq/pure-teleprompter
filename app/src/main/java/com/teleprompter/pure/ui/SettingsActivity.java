@@ -185,14 +185,8 @@ public class SettingsActivity extends AppCompatActivity {
             updatePreview();
         });
 
-        // 意见反馈
-        findViewById(R.id.item_feedback).setOnClickListener(v -> sendFeedbackEmail());
-
-        // 联系作者
-        findViewById(R.id.item_contact).setOnClickListener(v -> copyContactInfo());
-
-        // 开源主页
-        findViewById(R.id.item_github).setOnClickListener(v -> openGitHubRepo());
+        // 联系作者 (发邮件至 ichad@qq.com)
+        findViewById(R.id.item_contact).setOnClickListener(v -> sendEmailToAuthor());
 
         // 隐私政策与免责声明
         findViewById(R.id.item_privacy).setOnClickListener(v -> showPrivacyDialog());
@@ -201,44 +195,23 @@ public class SettingsActivity extends AppCompatActivity {
         findViewById(R.id.item_about).setOnClickListener(v -> showAboutDialog());
     }
 
-    private void sendFeedbackEmail() {
-        String recipient = "chadlzq@gmail.com";
-        String subject = "【极简提词器】用户反馈与产品建议";
+    private void sendEmailToAuthor() {
+        String recipient = "ichad@qq.com";
+        String subject = "【极简提词器】与作者沟通交流";
         String deviceInfo = "\n\n---------------------\n设备机型：" + Build.MANUFACTURER + " " + Build.MODEL +
                 "\n系统版本：Android " + Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + ")" +
-                "\n应用版本：v1.3.0 (Build 3)\n---------------------\n";
+                "\n应用版本：v1.1.0\n---------------------\n";
 
         Intent intent = new Intent(Intent.ACTION_SENDTO);
         intent.setData(Uri.parse("mailto:" + recipient));
         intent.putExtra(Intent.EXTRA_SUBJECT, subject);
-        intent.putExtra(Intent.EXTRA_TEXT, "请在此输入您的反馈与改进建议：" + deviceInfo);
+        intent.putExtra(Intent.EXTRA_TEXT, "您好！我想向您交流反馈：" + deviceInfo);
 
         try {
-            startActivity(Intent.createChooser(intent, "选择邮件客户端"));
+            startActivity(Intent.createChooser(intent, "选择邮件客户端联系作者"));
         } catch (Exception e) {
             copyToClipboard(recipient);
-            new AlertDialog.Builder(this)
-                    .setTitle("意见反馈")
-                    .setMessage("作者联系邮箱已复制到剪贴板：\n" + recipient + "\n\n欢迎您随时发送邮件提出宝贵建议！")
-                    .setPositiveButton("好的", null)
-                    .show();
-        }
-    }
-
-    private void copyContactInfo() {
-        String email = "chadlzq@gmail.com";
-        copyToClipboard(email);
-        Toast.makeText(this, "作者邮箱已复制：" + email, Toast.LENGTH_SHORT).show();
-    }
-
-    private void openGitHubRepo() {
-        String url = "https://github.com/chadlzq/pure-teleprompter";
-        try {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-            startActivity(intent);
-        } catch (Exception e) {
-            copyToClipboard(url);
-            Toast.makeText(this, "已复制项目开源地址至剪贴板", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "作者邮箱已复制：" + recipient, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -259,15 +232,14 @@ public class SettingsActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle("关于 极简提词器")
                 .setMessage("极简提词器 (Pure Teleprompter)\n" +
-                        "版本：v1.3.0 (Build 3)\n" +
+                        "版本：v1.1.0\n" +
                         "开源许可：Apache-2.0 License\n\n" +
                         "为个人创作者、短视频口播、演播主持打造的专注利器：\n" +
                         "• 纯本地离线单机，永无广告与会员套路\n" +
                         "• 全屏大字演播板 + 悬浮窗自适应旋转\n" +
                         "• 光学分光镜水平镜像翻转支持\n" +
                         "• 流畅恒速平滑跟读引擎\n\n" +
-                        "GitHub：chadlzq/pure-teleprompter\n" +
-                        "作者邮箱：chadlzq@gmail.com")
+                        "作者邮箱：ichad@qq.com")
                 .setPositiveButton("确定", null)
                 .show();
     }

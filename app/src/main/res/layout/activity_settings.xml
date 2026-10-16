@@ -414,34 +414,7 @@
                 android:textStyle="bold"
                 android:layout_marginBottom="6dp" />
 
-            <!-- 意见反馈 (唤起邮箱或复制邮箱) -->
-            <RelativeLayout
-                android:id="@+id/item_feedback"
-                android:layout_width="match_parent"
-                android:layout_height="52dp"
-                android:background="?android:attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="意见反馈"
-                    android:textColor="#FFFFFF"
-                    android:textSize="15sp"
-                    android:layout_centerVertical="true" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="邮件反馈 ➔"
-                    android:textColor="#80FFFFFF"
-                    android:textSize="13sp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true" />
-            </RelativeLayout>
-
-            <!-- 联系作者 -->
+            <!-- 联系作者 (发邮件至 ichad@qq.com) -->
             <RelativeLayout
                 android:id="@+id/item_contact"
                 android:layout_width="match_parent"
@@ -462,35 +435,8 @@
                     android:id="@+id/tv_contact_email"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="chadlzq@gmail.com"
+                    android:text="ichad@qq.com ➔"
                     android:textColor="#38EF7D"
-                    android:textSize="13sp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true" />
-            </RelativeLayout>
-
-            <!-- 开源主页 -->
-            <RelativeLayout
-                android:id="@+id/item_github"
-                android:layout_width="match_parent"
-                android:layout_height="52dp"
-                android:background="?android:attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="开源主页 (GitHub)"
-                    android:textColor="#FFFFFF"
-                    android:textSize="15sp"
-                    android:layout_centerVertical="true" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="pure-teleprompter ➔"
-                    android:textColor="#80FFFFFF"
                     android:textSize="13sp"
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true" />
@@ -544,7 +490,7 @@
                     android:id="@+id/tv_app_version"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="v1.3.0 (Build 3)"
+                    android:text="v1.1.0"
                     android:textColor="#80FFFFFF"
                     android:textSize="13sp"
                     android:layout_alignParentEnd="true"

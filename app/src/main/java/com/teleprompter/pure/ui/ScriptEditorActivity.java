@@ -50,10 +50,8 @@ public class ScriptEditorActivity extends AppCompatActivity {
     private EditText mEtTitle;
     private EditText mEtContent;
     private TextView mTvStatsChip;
-    private TextView mTvSaveStatus;
     private View mBtnPaste;
     private View mBtnClear;
-    private View mBtnImportTxt;
     private View mBtnLaunchPrompter;
     private View mBtnLaunchBoard;
     private View mBtnBack;
@@ -66,16 +64,6 @@ public class ScriptEditorActivity extends AppCompatActivity {
     private final Handler mAutoSaveHandler = new Handler(Looper.getMainLooper());
 
     private boolean mHasUnsavedChanges = false;
-
-    // 系统文件选择器 (SAF: 支持 Android 全版本免存储权限安全读取)
-    private final ActivityResultLauncher<String[]> mOpenFileLauncher = registerForActivityResult(
-            new ActivityResultContracts.OpenDocument(),
-            uri -> {
-                if (uri != null) {
-                    importTxtFromUri(uri);
-                }
-            }
-    );
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -94,10 +82,8 @@ public class ScriptEditorActivity extends AppCompatActivity {
         mEtTitle = findViewById(R.id.et_script_title);
         mEtContent = findViewById(R.id.et_script_content);
         mTvStatsChip = findViewById(R.id.tv_stats_chip);
-        mTvSaveStatus = findViewById(R.id.tv_save_status);
         mBtnPaste = findViewById(R.id.btn_paste_clipboard);
         mBtnClear = findViewById(R.id.btn_clear_content);
-        mBtnImportTxt = findViewById(R.id.btn_import_txt);
         mBtnLaunchPrompter = findViewById(R.id.btn_launch_prompter);
         mBtnLaunchBoard = findViewById(R.id.btn_launch_board);
         mBtnBack = findViewById(R.id.btn_back);
@@ -146,16 +132,6 @@ public class ScriptEditorActivity extends AppCompatActivity {
             Toast.makeText(this, "台词已清空", Toast.LENGTH_SHORT).show();
         });
 
-        // 导入 TXT
-        mBtnImportTxt.setOnClickListener(v -> {
-            try {
-                // 仅筛选 txt 文本文件
-                mOpenFileLauncher.launch(new String[]{"text/plain"});
-            } catch (Exception e) {
-                Toast.makeText(this, "无法打开系统文件选择器", Toast.LENGTH_SHORT).show();
-            }
-        });
-
         // 开启悬浮窗提词
         mBtnLaunchPrompter.setOnClickListener(v -> {
             saveScriptBlocking();
@@ -180,96 +156,6 @@ public class ScriptEditorActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * 高容错 TXT 文本导入，自动识别 UTF-8 与 GBK
-     */
-    private void importTxtFromUri(Uri uri) {
-        mDbExecutor.execute(() -> {
-            InputStream is = null;
-            ByteArrayOutputStream bos = null;
-            try {
-                String fileName = "导入台词";
-                Cursor cursor = getContentResolver().query(uri, null, null, null, null);
-                if (cursor != null) {
-                    if (cursor.moveToFirst()) {
-                        int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-                        if (nameIndex >= 0) {
-                            String displayName = cursor.getString(nameIndex);
-                            if (!TextUtils.isEmpty(displayName)) {
-                                fileName = displayName;
-                            }
-                        }
-                    }
-                    cursor.close();
-                }
-
-                // 严格校验是否为 .txt 文件，若不是则拒绝并提示，防止用户选错非文本文件导致崩溃
-                String lowerName = fileName.toLowerCase();
-                String mimeType = getContentResolver().getType(uri);
-                if (!lowerName.endsWith(".txt") && (mimeType != null && !mimeType.startsWith("text/"))) {
-                    mMainHandler.post(() -> Toast.makeText(this, "请选择标准 .txt 格式文本文件", Toast.LENGTH_SHORT).show());
-                    return;
-                }
-
-                if (lowerName.endsWith(".txt")) {
-                    fileName = fileName.substring(0, fileName.length() - 4);
-                }
-
-                is = getContentResolver().openInputStream(uri);
-                if (is == null) {
-                    mMainHandler.post(() -> Toast.makeText(this, "读取文件失败", Toast.LENGTH_SHORT).show());
-                    return;
-                }
-
-                bos = new ByteArrayOutputStream();
-                byte[] buffer = new byte[8192];
-                int len;
-                int totalRead = 0;
-                while ((len = is.read(buffer)) != -1) {
-                    bos.write(buffer, 0, len);
-                    totalRead += len;
-                    if (totalRead > 2 * 1024 * 1024) break; // 限制2MB防内存溢出
-                }
-
-                byte[] fileBytes = bos.toByteArray();
-                if (fileBytes.length == 0) {
-                    mMainHandler.post(() -> Toast.makeText(this, "所选文件为空", Toast.LENGTH_SHORT).show());
-                    return;
-                }
-
-                String content = new String(fileBytes, StandardCharsets.UTF_8);
-                if (content.contains("\uFFFD")) {
-                    try {
-                        content = new String(fileBytes, Charset.forName("GB18030"));
-                    } catch (Exception ignored) {
-                        content = new String(fileBytes, Charset.forName("GBK"));
-                    }
-                }
-
-                final String finalTitle = fileName;
-                final String finalContent = content.trim();
-
-                mMainHandler.post(() -> {
-                    if (TextUtils.isEmpty(mEtTitle.getText())) {
-                        mEtTitle.setText(finalTitle);
-                    }
-                    mEtContent.setText(finalContent);
-                    mHasUnsavedChanges = true;
-                    scheduleAutoSave();
-                    Toast.makeText(this, "成功导入文档: " + finalTitle, Toast.LENGTH_SHORT).show();
-                });
-
-            } catch (Exception e) {
-                mMainHandler.post(() -> Toast.makeText(this, "导入失败，请选择标准 TXT 文本", Toast.LENGTH_SHORT).show());
-            } finally {
-                try {
-                    if (is != null) is.close();
-                    if (bos != null) bos.close();
-                } catch (Exception ignored) {}
-            }
-        });
-    }
-
     private void loadScriptData() {
         if (mScriptId > 0) {
             mDbExecutor.execute(() -> {
@@ -281,7 +167,6 @@ public class ScriptEditorActivity extends AppCompatActivity {
                         mEtContent.setText(script.content);
                         updateStats(script.content);
                         mHasUnsavedChanges = false;
-                        mTvSaveStatus.setText("已载入本地台词");
                     });
                 }
             });
@@ -339,7 +224,6 @@ public class ScriptEditorActivity extends AppCompatActivity {
     private void scheduleAutoSave() {
         mAutoSaveHandler.removeCallbacks(mAutoSaveRunnable);
         mAutoSaveHandler.postDelayed(mAutoSaveRunnable, 600);
-        mTvSaveStatus.setText("正在保存...");
     }
 
     private final Runnable mAutoSaveRunnable = this::saveScriptDirectly;
@@ -354,7 +238,6 @@ public class ScriptEditorActivity extends AppCompatActivity {
         String content = mEtContent.getText().toString();
 
         if (TextUtils.isEmpty(title) && TextUtils.isEmpty(content)) {
-            mTvSaveStatus.setText("无内容无需保存");
             return;
         }
 
@@ -388,7 +271,6 @@ public class ScriptEditorActivity extends AppCompatActivity {
                     mScriptId = newId;
                 }
                 mHasUnsavedChanges = false;
-                mMainHandler.post(() -> mTvSaveStatus.setText("已保存到本地台词本"));
             } catch (Exception ignored) {}
         });
     }

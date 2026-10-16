@@ -38,8 +38,8 @@ public class PromptBoardActivity extends AppCompatActivity {
 
     private SmoothTextScrollView mScrollView;
     private TextView mTvCountdown;
-    private TextView mBtnMirror;
-    private TextView mBtnRotate;
+    private ImageView mBtnMirror;
+    private ImageView mBtnRotate;
     private ImageView mBtnReset;
     private ImageView mBtnPlayPause;
     private View mBtnBack;
@@ -86,8 +86,15 @@ public class PromptBoardActivity extends AppCompatActivity {
         int speed = PrompterPreferences.getScrollSpeed(this);
         float fontSize = PrompterPreferences.getFontSize(this);
         int textColor = PrompterPreferences.getTextColor(this);
+        int bgColor = PrompterPreferences.getBgColor(this);
         int countdown = PrompterPreferences.getCountdownSec(this);
         boolean mirror = PrompterPreferences.isMirror(this);
+
+        // 全屏演播大板同步应用用户在设置中所选背景底色
+        View rootLayout = findViewById(R.id.board_root_layout);
+        if (rootLayout != null) {
+            rootLayout.setBackgroundColor(bgColor);
+        }
 
         mScrollView.setScrollSpeed(speed);
         mScrollView.setTextSize(fontSize);
@@ -95,7 +102,7 @@ public class PromptBoardActivity extends AppCompatActivity {
         mScrollView.setCountdownSeconds(countdown);
         mScrollView.setMirror(mirror);
 
-        mBtnMirror.setTextColor(mirror ? 0xFF38EF7D : 0xFFFFFFFF);
+        mBtnMirror.setColorFilter(mirror ? 0xFF38EF7D : Color.WHITE);
     }
 
     private void setupListeners() {
@@ -108,7 +115,7 @@ public class PromptBoardActivity extends AppCompatActivity {
         mBtnMirror.setOnClickListener(v -> {
             mScrollView.toggleMirror();
             boolean isMirror = mScrollView.isMirror();
-            mBtnMirror.setTextColor(isMirror ? 0xFF38EF7D : 0xFFFFFFFF);
+            mBtnMirror.setColorFilter(isMirror ? 0xFF38EF7D : Color.WHITE);
             Toast.makeText(this, isMirror ? "已开启分光镜镜像翻转" : "已恢复正常显示", Toast.LENGTH_SHORT).show();
         });
 

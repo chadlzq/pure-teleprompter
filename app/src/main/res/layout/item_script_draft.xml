@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- 
     极简精美台词卡片 (item_script_draft.xml)
-    轻量紧凑布局，标题与日期横向对称，底部数据标签与操作按钮紧凑排布
+    微交互安全升级版：
+    1. 【防误触安全设计】：删除按键从底部移至卡片右上角，并用醒目警示红 (#FF5252) 标明，彻底杜绝开播时误触删除
+    2. 【时间位置优化】：更新时间精准置于“约多少分多少秒”标签正上方，层次清晰
+    3. 【紧凑精致布局】：右下角仅保留全屏与悬浮两枚核心开播按键
 -->
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -27,30 +30,31 @@
             android:id="@+id/tv_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
             android:ellipsize="end"
             android:maxLines="1"
             android:text="台词标题"
             android:textColor="#FFFFFF"
             android:textSize="15sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@id/tv_date"
+            app:layout_constraintEnd_toStartOf="@id/btn_delete"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- 日期时间 (右上角横向排布，不挤占底部标签) -->
-        <TextView
-            android:id="@+id/tv_date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:singleLine="true"
-            android:text="2024.04.12 15:30"
-            android:textColor="#66FFFFFF"
-            android:textSize="11sp"
-            app:layout_constraintBaseline_toBaselineOf="@id/tv_title"
-            app:layout_constraintEnd_toEndOf="parent" />
+        <!-- 删除按钮 (安全置于右上角，图标醒目红色，彻底防误触) -->
+        <ImageView
+            android:id="@+id/btn_delete"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:padding="5dp"
+            android:src="@drawable/ic_delete"
+            app:tint="#FF5252"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="删除台词"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- 2行台词正文精要 (去繁化简，卡片高度大幅降低) -->
+        <!-- 2行台词正文精要 (去繁化简) -->
         <TextView
             android:id="@+id/tv_preview"
             android:layout_width="match_parent"
@@ -66,70 +70,78 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_title" />
 
-        <!-- 底部左侧：时长与字数标签 (纯横向排列，不换行) -->
+        <!-- 底部左侧信息区：更新时间置于预估时长上面 -->
         <LinearLayout
-            android:id="@+id/ll_tags"
-            android:layout_width="wrap_content"
+            android:id="@+id/ll_left_info"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
+            android:layout_marginEnd="10dp"
+            android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/ll_actions"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_preview">
 
+            <!-- 时间日期 (置于时长标签正上方) -->
             <TextView
-                android:id="@+id/tv_duration_tag"
+                android:id="@+id/tv_date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_tag_pill"
-                android:paddingHorizontal="7dp"
-                android:paddingVertical="2dp"
-                android:text="⏱ 45 秒"
-                android:textColor="#38EF7D"
+                android:layout_marginBottom="4dp"
+                android:singleLine="true"
+                android:text="2024.04.12 15:30"
+                android:textColor="#66FFFFFF"
                 android:textSize="11sp" />
 
-            <TextView
-                android:id="@+id/tv_words_tag"
+            <!-- 时长与字数标签栏 -->
+            <LinearLayout
+                android:id="@+id/ll_tags"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:background="@drawable/bg_tag_pill"
-                android:paddingHorizontal="7dp"
-                android:paddingVertical="2dp"
-                android:text="180 字"
-                android:textColor="#80FFFFFF"
-                android:textSize="11sp" />
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tv_duration_tag"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_tag_pill"
+                    android:paddingHorizontal="7dp"
+                    android:paddingVertical="2dp"
+                    android:text="⏱ 45 秒"
+                    android:textColor="#38EF7D"
+                    android:textSize="11sp" />
+
+                <TextView
+                    android:id="@+id/tv_words_tag"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:background="@drawable/bg_tag_pill"
+                    android:paddingHorizontal="7dp"
+                    android:paddingVertical="2dp"
+                    android:text="180 字"
+                    android:textColor="#80FFFFFF"
+                    android:textSize="11sp" />
+            </LinearLayout>
         </LinearLayout>
 
-        <!-- 底部右侧：全屏、删除、悬浮开播 -->
+        <!-- 底部右侧：仅保留全屏开播、悬浮开播两项核心高频操作，零误触 -->
         <LinearLayout
             android:id="@+id/ll_actions"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            app:layout_constraintBottom_toBottomOf="@id/ll_tags"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/ll_tags">
-
-            <!-- 删除按钮 -->
-            <ImageView
-                android:id="@+id/btn_delete"
-                android:layout_width="28dp"
-                android:layout_height="28dp"
-                android:padding="6dp"
-                android:src="@drawable/ic_delete"
-                app:tint="#66FFFFFF"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:contentDescription="删除台词" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
             <!-- 全屏提词板按钮 -->
             <ImageView
                 android:id="@+id/btn_board"
                 android:layout_width="28dp"
                 android:layout_height="28dp"
-                android:layout_marginStart="6dp"
                 android:background="@drawable/bg_segmented_capsule"
                 android:padding="6dp"
                 android:src="@drawable/ic_fullscreen"
