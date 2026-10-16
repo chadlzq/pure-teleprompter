@@ -1,0 +1,413 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0F1015">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#0F1015"
+        app:elevation="0dp">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize">
+
+            <ImageView
+                android:id="@+id/btn_back"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:padding="8dp"
+                android:src="@drawable/ic_arrow_back"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="返回" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="提词偏好设置"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/btn_reset_defaults"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginEnd="16dp"
+                android:padding="8dp"
+                android:text="恢复默认"
+                android:textColor="#80FFFFFF"
+                android:textSize="14sp" />
+        </androidx.appcompat.widget.Toolbar>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:padding="16dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- 1. 实时预览区域 (Live Preview Card) -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="实时效果预览"
+                android:textColor="#80FFFFFF"
+                android:textSize="13sp"
+                android:layout_marginBottom="8dp" />
+
+            <FrameLayout
+                android:id="@+id/preview_card_container"
+                android:layout_width="match_parent"
+                android:layout_height="140dp"
+                android:background="@drawable/bg_banner_create_card"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/tv_preview_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:lineSpacingExtra="6dp"
+                    android:text="这是一段提词实时预览文案。字体大小、颜色与背景透明度将实时同步生效。"
+                    android:textColor="#FFFFFF"
+                    android:textSize="22sp" />
+            </FrameLayout>
+
+            <!-- 2. 字体与排版设置 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="字体大小"
+                android:textColor="#FFFFFF"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:layout_marginTop="24dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <SeekBar
+                    android:id="@+id/sb_font_size"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:max="40"
+                    android:progress="24"
+                    android:progressTint="#38EF7D"
+                    android:thumbTint="#38EF7D" />
+
+                <TextView
+                    android:id="@+id/tv_font_size_val"
+                    android:layout_width="54dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="end"
+                    android:text="24 sp"
+                    android:textColor="#38EF7D"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- 字体颜色调色板 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="文字颜色"
+                android:textColor="#FFFFFF"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:layout_marginTop="20dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <!-- 纯白 -->
+                <View
+                    android:id="@+id/color_txt_white"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_color_circle"
+                    android:backgroundTint="#FFFFFF" />
+
+                <!-- 纯黑 -->
+                <View
+                    android:id="@+id/color_txt_black"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="14dp"
+                    android:background="@drawable/bg_color_circle"
+                    android:backgroundTint="#000000" />
+
+                <!-- 柠檬黄 -->
+                <View
+                    android:id="@+id/color_txt_yellow"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="14dp"
+                    android:background="@drawable/bg_color_circle"
+                    android:backgroundTint="#FFEE58" />
+
+                <!-- 翠绿 -->
+                <View
+                    android:id="@+id/color_txt_green"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="14dp"
+                    android:background="@drawable/bg_color_circle"
+                    android:backgroundTint="#38EF7D" />
+
+                <!-- 科技青 -->
+                <View
+                    android:id="@+id/color_txt_cyan"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="14dp"
+                    android:background="@drawable/bg_color_circle"
+                    android:backgroundTint="#00E5FF" />
+
+                <!-- 暖橙 -->
+                <View
+                    android:id="@+id/color_txt_orange"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="14dp"
+                    android:background="@drawable/bg_color_circle"
+                    android:backgroundTint="#FF9100" />
+
+                <!-- 亮粉 -->
+                <View
+                    android:id="@+id/color_txt_pink"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="14dp"
+                    android:background="@drawable/bg_color_circle"
+                    android:backgroundTint="#FF4081" />
+            </LinearLayout>
+
+            <!-- 3. 背景底色调色板 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="背景底色"
+                android:textColor="#FFFFFF"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:layout_marginTop="24dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <!-- 经典黑 -->
+                <View
+                    android:id="@+id/color_bg_dark"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_color_circle"
+                    android:backgroundTint="#12141A" />
+
+                <!-- 纯白 -->
+                <View
+                    android:id="@+id/color_bg_white"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="14dp"
+                    android:background="@drawable/bg_color_circle"
+                    android:backgroundTint="#FFFFFF" />
+
+                <!-- 藏青 -->
+                <View
+                    android:id="@+id/color_bg_navy"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="14dp"
+                    android:background="@drawable/bg_color_circle"
+                    android:backgroundTint="#0D1B2A" />
+
+                <!-- 墨绿 -->
+                <View
+                    android:id="@+id/color_bg_green"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="14dp"
+                    android:background="@drawable/bg_color_circle"
+                    android:backgroundTint="#0C1E14" />
+
+                <!-- 深灰 -->
+                <View
+                    android:id="@+id/color_bg_gray"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="14dp"
+                    android:background="@drawable/bg_color_circle"
+                    android:backgroundTint="#282A36" />
+            </LinearLayout>
+
+            <!-- 背景透明度 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="背景透明度"
+                android:textColor="#FFFFFF"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:layout_marginTop="20dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <SeekBar
+                    android:id="@+id/sb_opacity"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:max="100"
+                    android:progress="75"
+                    android:progressTint="#38EF7D"
+                    android:thumbTint="#38EF7D" />
+
+                <TextView
+                    android:id="@+id/tv_opacity_val"
+                    android:layout_width="54dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="end"
+                    android:text="75%"
+                    android:textColor="#38EF7D"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- 4. 滚动速度 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="默认滚动速度"
+                android:textColor="#FFFFFF"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:layout_marginTop="24dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <SeekBar
+                    android:id="@+id/sb_speed"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:max="120"
+                    android:min="10"
+                    android:progress="55"
+                    android:progressTint="#38EF7D"
+                    android:thumbTint="#38EF7D" />
+
+                <TextView
+                    android:id="@+id/tv_speed_val"
+                    android:layout_width="54dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="end"
+                    android:text="55 px/s"
+                    android:textColor="#38EF7D"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- 5. 倒计时与镜像翻转开关 -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#1AFFFFFF"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="12dp" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="3-2-1 启动倒计时"
+                    android:textColor="#FFFFFF"
+                    android:textSize="15sp"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/switch_countdown"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="分光镜镜像翻转 (左右水平翻转)"
+                    android:textColor="#FFFFFF"
+                    android:textSize="15sp"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/switch_mirror"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true" />
+            </RelativeLayout>
+
+            <!-- 底部合规声明 -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_marginTop="32dp"
+                android:layout_marginBottom="24dp"
+                android:text="100% 本地纯净运行 · 无任何网络通信 · 保护台词隐私安全"
+                android:textColor="#40FFFFFF"
+                android:textSize="12sp" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

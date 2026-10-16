@@ -42,12 +42,12 @@ public class SmoothTextScrollView extends ScrollView {
     private CountDownTimer mCountDownTimer;
 
     // 控制参数
-    private int mScrollSpeed = 30; // 滚动速度 (像素/秒)
+    private int mScrollSpeed = 55; // 滚动速度 (像素/秒, 默认适配流畅口播)
     private boolean mIsPlaying = false;
     private boolean mIsUserTouching = false;
     private int mCurrentAlignment = ALIGN_LEFT;
     private boolean mIsMirror = false;
-    private int mCountdownSeconds = 3; // 默认 3 秒倒计时
+    private int mCountdownSeconds = 0; // 默认 0 秒 (倒计时默认关闭)
     private boolean mIsCountingDown = false;
 
     // 16ms 步进滚动引擎

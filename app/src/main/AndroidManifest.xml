@@ -14,18 +14,28 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TeleprompterPure">
 
-        <!-- 主入口：台词库与编辑器 -->
+        <!-- 应用主入口：我的台词草稿箱 (ScriptManagerActivity) -->
         <activity
-            android:name=".ui.ScriptEditorActivity"
-            android:exported="true"
-            android:windowSoftInputMode="adjustResize">
+            android:name=".ui.ScriptManagerActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <!-- 全屏演播室提词板 -->
+        <!-- 台词编辑器 (ScriptEditorActivity) -->
+        <activity
+            android:name=".ui.ScriptEditorActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- 提词偏好设置 (SettingsActivity) -->
+        <activity
+            android:name=".ui.SettingsActivity"
+            android:exported="false" />
+
+        <!-- 全屏演播室提词板 (PromptBoardActivity) -->
         <activity
             android:name=".ui.PromptBoardActivity"
             android:exported="false"

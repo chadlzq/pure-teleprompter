@@ -24,27 +24,24 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.teleprompter.pure.FloatingPrompterManager;
+import com.teleprompter.pure.PrompterPreferences;
+import com.teleprompter.pure.R;
 import com.teleprompter.pure.database.AppDatabase;
 import com.teleprompter.pure.database.ScriptDao;
 import com.teleprompter.pure.database.ScriptEntity;
 
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 极简台词编辑器 (ScriptEditorActivity)
- * 
- * 核心功能：
- * 1. 标题与正文专注创作输入
- * 2. 实时字数统计与口播语速耗时预估 (每秒4字)
- * 3. 一键从系统剪贴板粘贴
- * 4. 【新增】：一键导入本地 TXT 文本文件 (自动提取标题与全文)
- * 5. 防丢失本地自动保存 (退出页面或输入停顿 800ms 自动静默落库 Room SQLite)
- * 6. 【新增】：支持一键呼出悬浮窗提词 或 一键进入全屏演播大板 (PromptBoardActivity)
+ * 纯本地专注创作输入，防丢失双重落库保护，TXT 智能防乱码解析
  */
 public class ScriptEditorActivity extends AppCompatActivity {
 
@@ -70,7 +67,7 @@ public class ScriptEditorActivity extends AppCompatActivity {
 
     private boolean mHasUnsavedChanges = false;
 
-    // 系统文件选择器 (SAF: 支持 Android 8~14+ 全机型免权限安全读取)
+    // 系统文件选择器 (SAF: 支持 Android 全版本免存储权限安全读取)
     private final ActivityResultLauncher<String[]> mOpenFileLauncher = registerForActivityResult(
             new ActivityResultContracts.OpenDocument(),
             uri -> {
@@ -83,7 +80,7 @@ public class ScriptEditorActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(com.teleprompter.pure.R.layout.activity_script_editor);
+        setContentView(R.layout.activity_script_editor);
 
         mScriptDao = AppDatabase.getInstance(this).scriptDao();
         mScriptId = getIntent().getLongExtra(EXTRA_SCRIPT_ID, 0L);
@@ -94,28 +91,29 @@ public class ScriptEditorActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        mEtTitle = findViewById(com.teleprompter.pure.R.id.et_script_title);
-        mEtContent = findViewById(com.teleprompter.pure.R.id.et_script_content);
-        mTvStatsChip = findViewById(com.teleprompter.pure.R.id.tv_stats_chip);
-        mTvSaveStatus = findViewById(com.teleprompter.pure.R.id.tv_save_status);
-        mBtnPaste = findViewById(com.teleprompter.pure.R.id.btn_paste_clipboard);
-        mBtnClear = findViewById(com.teleprompter.pure.R.id.btn_clear_content);
-        mBtnImportTxt = findViewById(com.teleprompter.pure.R.id.btn_import_txt);
-        mBtnLaunchPrompter = findViewById(com.teleprompter.pure.R.id.btn_launch_prompter);
-        mBtnLaunchBoard = findViewById(com.teleprompter.pure.R.id.btn_launch_board);
-        mBtnBack = findViewById(com.teleprompter.pure.R.id.btn_back);
+        mEtTitle = findViewById(R.id.et_script_title);
+        mEtContent = findViewById(R.id.et_script_content);
+        mTvStatsChip = findViewById(R.id.tv_stats_chip);
+        mTvSaveStatus = findViewById(R.id.tv_save_status);
+        mBtnPaste = findViewById(R.id.btn_paste_clipboard);
+        mBtnClear = findViewById(R.id.btn_clear_content);
+        mBtnImportTxt = findViewById(R.id.btn_import_txt);
+        mBtnLaunchPrompter = findViewById(R.id.btn_launch_prompter);
+        mBtnLaunchBoard = findViewById(R.id.btn_launch_board);
+        mBtnBack = findViewById(R.id.btn_back);
     }
 
     private void setupListeners() {
-        mBtnBack.setOnClickListener(v -> finish());
+        // 返回前确保执行物理保存
+        mBtnBack.setOnClickListener(v -> {
+            saveScriptBlocking();
+            finish();
+        });
 
         // 正文监听
         mEtContent.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
             @Override
             public void afterTextChanged(Editable s) {
@@ -127,11 +125,8 @@ public class ScriptEditorActivity extends AppCompatActivity {
 
         // 标题变动监听
         mEtTitle.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
             @Override
             public void afterTextChanged(Editable s) {
@@ -146,17 +141,23 @@ public class ScriptEditorActivity extends AppCompatActivity {
         // 一键清空
         mBtnClear.setOnClickListener(v -> {
             mEtContent.setText("");
+            mHasUnsavedChanges = true;
+            scheduleAutoSave();
             Toast.makeText(this, "台词已清空", Toast.LENGTH_SHORT).show();
         });
 
-        // 【新增】：一键导入 TXT 文本
+        // 导入 TXT
         mBtnImportTxt.setOnClickListener(v -> {
-            mOpenFileLauncher.launch(new String[]{"text/plain", "text/*", "*/*"});
+            try {
+                mOpenFileLauncher.launch(new String[]{"text/plain", "*/*"});
+            } catch (Exception e) {
+                Toast.makeText(this, "无法打开系统文件选择器", Toast.LENGTH_SHORT).show();
+            }
         });
 
         // 开启悬浮窗提词
         mBtnLaunchPrompter.setOnClickListener(v -> {
-            saveScriptSync();
+            saveScriptBlocking();
             if (mCurrentScript != null && !TextUtils.isEmpty(mCurrentScript.content)) {
                 FloatingPrompterManager.getInstance().showPrompter(this, mCurrentScript);
                 Toast.makeText(this, "已开启悬浮提词器", Toast.LENGTH_SHORT).show();
@@ -165,9 +166,9 @@ public class ScriptEditorActivity extends AppCompatActivity {
             }
         });
 
-        // 【新增】：一键进入全屏提词大板
+        // 一键进入全屏提词大板
         mBtnLaunchBoard.setOnClickListener(v -> {
-            saveScriptSync();
+            saveScriptBlocking();
             if (mCurrentScript != null && !TextUtils.isEmpty(mCurrentScript.content)) {
                 Intent intent = new Intent(this, PromptBoardActivity.class);
                 intent.putExtra(PromptBoardActivity.EXTRA_SCRIPT_ID, mCurrentScript.id);
@@ -179,50 +180,83 @@ public class ScriptEditorActivity extends AppCompatActivity {
     }
 
     /**
-     * 【TXT 导入实现】：从 URI 流中安全解析文本与文件名
+     * 高容错 TXT 文本导入，自动识别 UTF-8 与 GBK
      */
     private void importTxtFromUri(Uri uri) {
         mDbExecutor.execute(() -> {
+            InputStream is = null;
+            ByteArrayOutputStream bos = null;
             try {
                 String fileName = "导入台词";
                 Cursor cursor = getContentResolver().query(uri, null, null, null, null);
-                if (cursor != null && cursor.moveToFirst()) {
-                    int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-                    if (nameIndex >= 0) {
-                        fileName = cursor.getString(nameIndex);
+                if (cursor != null) {
+                    if (cursor.moveToFirst()) {
+                        int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                        if (nameIndex >= 0) {
+                            String displayName = cursor.getString(nameIndex);
+                            if (!TextUtils.isEmpty(displayName)) {
+                                fileName = displayName;
+                            }
+                        }
                     }
                     cursor.close();
                 }
 
-                if (fileName.endsWith(".txt")) {
+                if (fileName.toLowerCase().endsWith(".txt")) {
                     fileName = fileName.substring(0, fileName.length() - 4);
                 }
 
-                // 读取正文 (优先 UTF-8)
-                InputStream is = getContentResolver().openInputStream(uri);
-                if (is == null) return;
-
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
-                StringBuilder sb = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line).append("\n");
+                is = getContentResolver().openInputStream(uri);
+                if (is == null) {
+                    mMainHandler.post(() -> Toast.makeText(this, "读取文件失败", Toast.LENGTH_SHORT).show());
+                    return;
                 }
-                reader.close();
+
+                bos = new ByteArrayOutputStream();
+                byte[] buffer = new byte[8192];
+                int len;
+                int totalRead = 0;
+                while ((len = is.read(buffer)) != -1) {
+                    bos.write(buffer, 0, len);
+                    totalRead += len;
+                    if (totalRead > 2 * 1024 * 1024) break; // 限制2MB防内存溢出
+                }
+
+                byte[] fileBytes = bos.toByteArray();
+                if (fileBytes.length == 0) {
+                    mMainHandler.post(() -> Toast.makeText(this, "所选文件为空", Toast.LENGTH_SHORT).show());
+                    return;
+                }
+
+                String content = new String(fileBytes, StandardCharsets.UTF_8);
+                if (content.contains("\uFFFD")) {
+                    try {
+                        content = new String(fileBytes, Charset.forName("GB18030"));
+                    } catch (Exception ignored) {
+                        content = new String(fileBytes, Charset.forName("GBK"));
+                    }
+                }
 
                 final String finalTitle = fileName;
-                final String finalContent = sb.toString().trim();
+                final String finalContent = content.trim();
 
                 mMainHandler.post(() -> {
                     if (TextUtils.isEmpty(mEtTitle.getText())) {
                         mEtTitle.setText(finalTitle);
                     }
                     mEtContent.setText(finalContent);
+                    mHasUnsavedChanges = true;
+                    scheduleAutoSave();
                     Toast.makeText(this, "成功导入文档: " + finalTitle, Toast.LENGTH_SHORT).show();
                 });
 
             } catch (Exception e) {
-                mMainHandler.post(() -> Toast.makeText(this, "导入失败，请检查文件格式", Toast.LENGTH_SHORT).show());
+                mMainHandler.post(() -> Toast.makeText(this, "导入失败，请选择标准 TXT 文本", Toast.LENGTH_SHORT).show());
+            } finally {
+                try {
+                    if (is != null) is.close();
+                    if (bos != null) bos.close();
+                } catch (Exception ignored) {}
             }
         });
     }
@@ -244,12 +278,15 @@ public class ScriptEditorActivity extends AppCompatActivity {
             });
         } else {
             mCurrentScript = new ScriptEntity();
+            // 使用全局偏好速度与大小
+            mCurrentScript.scrollSpeed = PrompterPreferences.getScrollSpeed(this);
+            mCurrentScript.fontSize = PrompterPreferences.getFontSize(this);
             updateStats("");
         }
     }
 
     private void updateStats(String text) {
-        int charCount = text.replaceAll("\\s+", "").length();
+        int charCount = (text != null) ? text.replaceAll("\\s+", "").length() : 0;
         int estimatedSec = (int) Math.ceil(charCount / 4.0);
 
         String durationStr;
@@ -276,13 +313,15 @@ public class ScriptEditorActivity extends AppCompatActivity {
             CharSequence pasteText = clip.getItemAt(0).coerceToText(this);
             if (!TextUtils.isEmpty(pasteText)) {
                 mEtContent.setText(pasteText);
-                
+
                 if (TextUtils.isEmpty(mEtTitle.getText())) {
                     String clean = pasteText.toString().trim().replaceAll("\\s+", " ");
-                    String autoTitle = clean.length() > 12 ? clean.substring(0, 12) + "..." : clean;
+                    String autoTitle = clean.length() > 14 ? clean.substring(0, 14) + "..." : clean;
                     mEtTitle.setText(autoTitle);
                 }
 
+                mHasUnsavedChanges = true;
+                scheduleAutoSave();
                 Toast.makeText(this, "已粘贴剪贴板台词", Toast.LENGTH_SHORT).show();
             }
         }
@@ -290,13 +329,16 @@ public class ScriptEditorActivity extends AppCompatActivity {
 
     private void scheduleAutoSave() {
         mAutoSaveHandler.removeCallbacks(mAutoSaveRunnable);
-        mAutoSaveHandler.postDelayed(mAutoSaveRunnable, 800);
+        mAutoSaveHandler.postDelayed(mAutoSaveRunnable, 600);
         mTvSaveStatus.setText("正在保存...");
     }
 
-    private final Runnable mAutoSaveRunnable = this::saveScriptAsync;
+    private final Runnable mAutoSaveRunnable = this::saveScriptDirectly;
 
-    private void saveScriptAsync() {
+    /**
+     * 核心保存逻辑，保证落库一致性
+     */
+    private void saveScriptDirectly() {
         if (!mHasUnsavedChanges) return;
 
         String title = mEtTitle.getText().toString().trim();
@@ -308,7 +350,12 @@ public class ScriptEditorActivity extends AppCompatActivity {
         }
 
         if (TextUtils.isEmpty(title)) {
-            title = "未命名台词";
+            if (!TextUtils.isEmpty(content)) {
+                String clean = content.trim().replaceAll("\\s+", " ");
+                title = clean.length() > 14 ? clean.substring(0, 14) + "..." : clean;
+            } else {
+                title = "未命名台词";
+            }
         }
 
         if (mCurrentScript == null) {
@@ -318,31 +365,81 @@ public class ScriptEditorActivity extends AppCompatActivity {
         mCurrentScript.title = title;
         mCurrentScript.content = content;
         mCurrentScript.wordCount = content.replaceAll("\\s+", "").length();
-        mCurrentScript.estimatedSec = (int) Math.ceil(mCurrentScript.wordCount / 4.0);
+        mCurrentScript.estimatedSec = Math.max(5, (int) Math.ceil(mCurrentScript.wordCount / 4.0));
         mCurrentScript.updateTime = System.currentTimeMillis();
 
         final ScriptEntity toSave = mCurrentScript;
         mDbExecutor.execute(() -> {
-            if (toSave.id > 0) {
-                mScriptDao.updateScript(toSave);
-            } else {
-                long newId = mScriptDao.insertScript(toSave);
-                toSave.id = newId;
-                mScriptId = newId;
-            }
-            mHasUnsavedChanges = false;
-            mMainHandler.post(() -> mTvSaveStatus.setText("已自动保存到本地数据库"));
+            try {
+                if (toSave.id > 0) {
+                    mScriptDao.updateScript(toSave);
+                } else {
+                    long newId = mScriptDao.insertScript(toSave);
+                    toSave.id = newId;
+                    mScriptId = newId;
+                }
+                mHasUnsavedChanges = false;
+                mMainHandler.post(() -> mTvSaveStatus.setText("已保存到本地台词本"));
+            } catch (Exception ignored) {}
         });
     }
 
-    private void saveScriptSync() {
-        saveScriptAsync();
+    /**
+     * 页面关闭或切入后台时的阻塞同步持久化（带 500ms 超时保护）
+     */
+    private void saveScriptBlocking() {
+        if (!mHasUnsavedChanges) return;
+
+        String title = mEtTitle.getText().toString().trim();
+        String content = mEtContent.getText().toString();
+
+        if (TextUtils.isEmpty(title) && TextUtils.isEmpty(content)) return;
+
+        if (TextUtils.isEmpty(title)) {
+            if (!TextUtils.isEmpty(content)) {
+                String clean = content.trim().replaceAll("\\s+", " ");
+                title = clean.length() > 14 ? clean.substring(0, 14) + "..." : clean;
+            } else {
+                title = "未命名台词";
+            }
+        }
+
+        if (mCurrentScript == null) {
+            mCurrentScript = new ScriptEntity();
+        }
+
+        mCurrentScript.title = title;
+        mCurrentScript.content = content;
+        mCurrentScript.wordCount = content.replaceAll("\\s+", "").length();
+        mCurrentScript.estimatedSec = Math.max(5, (int) Math.ceil(mCurrentScript.wordCount / 4.0));
+        mCurrentScript.updateTime = System.currentTimeMillis();
+
+        final ScriptEntity toSave = mCurrentScript;
+        try {
+            Future<?> future = mDbExecutor.submit(() -> {
+                if (toSave.id > 0) {
+                    mScriptDao.updateScript(toSave);
+                } else {
+                    long newId = mScriptDao.insertScript(toSave);
+                    toSave.id = newId;
+                    mScriptId = newId;
+                }
+                mHasUnsavedChanges = false;
+            });
+            future.get(500, TimeUnit.MILLISECONDS);
+        } catch (Exception ignored) {}
+    }
+
+    @Override
+    public void onBackPressed() {
+        saveScriptBlocking();
+        super.onBackPressed();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        saveScriptSync();
+        saveScriptBlocking();
     }
 
     @Override

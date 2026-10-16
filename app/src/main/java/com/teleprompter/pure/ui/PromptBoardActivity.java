@@ -10,6 +10,8 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.teleprompter.pure.PrompterPreferences;
+import com.teleprompter.pure.R;
 import com.teleprompter.pure.database.AppDatabase;
 import com.teleprompter.pure.database.ScriptEntity;
 
@@ -22,7 +24,7 @@ import java.util.concurrent.Executors;
  * 核心特性：
  * 1. 纯黑 OLED 节能抗反光背景
  * 2. 屏幕常亮 (FLAG_KEEP_SCREEN_ON) 绝不灭屏
- * 3. 3-2-1 准备倒计时
+ * 3. 视觉黄金参考线精准垂直居中
  * 4. 光学分光镜镜像翻转 (一键左右翻转)
  * 5. 手势自由滑词定位与一键回到首句
  */
@@ -48,7 +50,7 @@ public class PromptBoardActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         // 保持屏幕常亮
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        setContentView(com.teleprompter.pure.R.layout.activity_prompt_board);
+        setContentView(R.layout.activity_prompt_board);
 
         mScriptId = getIntent().getLongExtra(EXTRA_SCRIPT_ID, 0L);
 
@@ -58,21 +60,35 @@ public class PromptBoardActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        mScrollView = findViewById(com.teleprompter.pure.R.id.board_scroll_view);
-        mTvTitle = findViewById(com.teleprompter.pure.R.id.tv_board_title);
-        mTvCountdown = findViewById(com.teleprompter.pure.R.id.tv_board_countdown);
-        mBtnMirror = findViewById(com.teleprompter.pure.R.id.btn_toggle_mirror);
-        mBtnReset = findViewById(com.teleprompter.pure.R.id.btn_board_reset);
-        mBtnPlayPause = findViewById(com.teleprompter.pure.R.id.btn_board_play_pause);
-        mBtnBack = findViewById(com.teleprompter.pure.R.id.btn_board_back);
+        mScrollView = findViewById(R.id.board_scroll_view);
+        mTvTitle = findViewById(R.id.tv_board_title);
+        mTvCountdown = findViewById(R.id.tv_board_countdown);
+        mBtnMirror = findViewById(R.id.btn_toggle_mirror);
+        mBtnReset = findViewById(R.id.btn_board_reset);
+        mBtnPlayPause = findViewById(R.id.btn_board_play_pause);
+        mBtnBack = findViewById(R.id.btn_board_back);
 
-        mTabLeft = findViewById(com.teleprompter.pure.R.id.board_tab_left);
-        mTabCenter = findViewById(com.teleprompter.pure.R.id.board_tab_center);
-        mTabRight = findViewById(com.teleprompter.pure.R.id.board_tab_right);
+        mTabLeft = findViewById(R.id.board_tab_left);
+        mTabCenter = findViewById(R.id.board_tab_center);
+        mTabRight = findViewById(R.id.board_tab_right);
 
-        // 默认居中对齐、3秒倒计时
+        // 默认居中对齐
         mScrollView.setTextAlignmentMode(SmoothTextScrollView.ALIGN_CENTER);
-        mScrollView.setCountdownSeconds(3);
+
+        // 读取全局偏好配置
+        int speed = PrompterPreferences.getScrollSpeed(this);
+        float fontSize = PrompterPreferences.getFontSize(this);
+        int textColor = PrompterPreferences.getTextColor(this);
+        int countdown = PrompterPreferences.getCountdownSec(this);
+        boolean mirror = PrompterPreferences.isMirror(this);
+
+        mScrollView.setScrollSpeed(speed);
+        mScrollView.setTextSize(fontSize);
+        mScrollView.setTextColor(textColor);
+        mScrollView.setCountdownSeconds(countdown);
+        mScrollView.setMirror(mirror);
+
+        mBtnMirror.setTextColor(mirror ? 0xFF38EF7D : 0xFFFFFFFF);
     }
 
     private void setupListeners() {
@@ -96,7 +112,7 @@ public class PromptBoardActivity extends AppCompatActivity {
         mScrollView.setOnPrompterStateListener(new SmoothTextScrollView.OnPrompterStateListener() {
             @Override
             public void onPlayStateChanged(boolean isPlaying) {
-                mBtnPlayPause.setImageResource(isPlaying ? com.teleprompter.pure.R.drawable.ic_pause : com.teleprompter.pure.R.drawable.ic_play);
+                mBtnPlayPause.setImageResource(isPlaying ? R.drawable.ic_pause : R.drawable.ic_play);
             }
 
             @Override
@@ -104,7 +120,7 @@ public class PromptBoardActivity extends AppCompatActivity {
 
             @Override
             public void onReset() {
-                mBtnPlayPause.setImageResource(com.teleprompter.pure.R.drawable.ic_play);
+                mBtnPlayPause.setImageResource(R.drawable.ic_play);
                 mTvCountdown.setVisibility(View.GONE);
             }
 
@@ -128,9 +144,9 @@ public class PromptBoardActivity extends AppCompatActivity {
 
     private void setAlignmentUI(int mode) {
         mScrollView.setTextAlignmentMode(mode);
-        mTabLeft.setBackgroundResource(mode == SmoothTextScrollView.ALIGN_LEFT ? com.teleprompter.pure.R.drawable.bg_segment_active_pill : 0);
-        mTabCenter.setBackgroundResource(mode == SmoothTextScrollView.ALIGN_CENTER ? com.teleprompter.pure.R.drawable.bg_segment_active_pill : 0);
-        mTabRight.setBackgroundResource(mode == SmoothTextScrollView.ALIGN_RIGHT ? com.teleprompter.pure.R.drawable.bg_segment_active_pill : 0);
+        mTabLeft.setBackgroundResource(mode == SmoothTextScrollView.ALIGN_LEFT ? R.drawable.bg_segment_active_pill : 0);
+        mTabCenter.setBackgroundResource(mode == SmoothTextScrollView.ALIGN_CENTER ? R.drawable.bg_segment_active_pill : 0);
+        mTabRight.setBackgroundResource(mode == SmoothTextScrollView.ALIGN_RIGHT ? R.drawable.bg_segment_active_pill : 0);
     }
 
     private void loadScript() {
@@ -141,8 +157,6 @@ public class PromptBoardActivity extends AppCompatActivity {
                     runOnUiThread(() -> {
                         mTvTitle.setText(mScript.title);
                         mScrollView.setText(mScript.content);
-                        mScrollView.setScrollSpeed(mScript.scrollSpeed);
-                        mScrollView.setTextSize(mScript.fontSize);
                     });
                 }
             });
