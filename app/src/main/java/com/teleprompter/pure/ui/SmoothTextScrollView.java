@@ -117,12 +117,36 @@ public class SmoothTextScrollView extends ScrollView {
                 ViewGroup.LayoutParams.WRAP_CONTENT
         );
         
-        // 上下增加足够 padding，确保首句和末句均能滚动到正中参考线
+        // 初始设置适度 padding，具体在 onSizeChanged 根据视窗高度精确设置为 h/2
         int paddingVertical = dp2px(110);
         int paddingHorizontal = dp2px(14);
         mInnerTextView.setPadding(paddingHorizontal, paddingVertical, paddingHorizontal, paddingVertical);
 
         addView(mInnerTextView, lp);
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        updatePadding();
+    }
+
+    public void updatePadding() {
+        int h = getHeight();
+        if (h > 0 && mInnerTextView != null) {
+            // 首句与中心视线参考线完美居中：将第一行的中心与视线焦点线精确对齐
+            int lineHeight = mInnerTextView.getLineHeight();
+            if (lineHeight <= 0) {
+                lineHeight = dp2px(30);
+            }
+            int topPadding = Math.max(0, (h - lineHeight) / 2);
+            int bottomPadding = h / 2;
+            int paddingHorizontal = dp2px(14);
+            mInnerTextView.setPadding(paddingHorizontal, topPadding, paddingHorizontal, bottomPadding);
+            if (getScrollY() == 0) {
+                scrollTo(0, 0);
+            }
+        }
     }
 
     public void setOnPrompterStateListener(OnPrompterStateListener listener) {
@@ -206,6 +230,7 @@ public class SmoothTextScrollView extends ScrollView {
     public void setTextSize(float sp) {
         if (mInnerTextView != null) {
             mInnerTextView.setTextSize(sp);
+            post(this::updatePadding);
         }
     }
 

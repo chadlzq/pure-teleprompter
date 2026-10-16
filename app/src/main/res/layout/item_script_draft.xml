@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 
+    极简精美台词卡片 (item_script_draft.xml)
+    轻量紧凑布局，标题与日期横向对称，底部数据标签与操作按钮紧凑排布
+-->
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/card_script_item"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
+    android:layout_marginBottom="8dp"
     app:cardBackgroundColor="#1A1C24"
-    app:cardCornerRadius="16dp"
+    app:cardCornerRadius="14dp"
     app:cardElevation="0dp"
     app:strokeColor="#26FFFFFF"
     app:strokeWidth="1dp">
@@ -15,9 +19,10 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:paddingHorizontal="14dp"
+        android:paddingVertical="12dp">
 
-        <!-- 标题行 -->
+        <!-- 标题 (左侧加粗白字) -->
         <TextView
             android:id="@+id/tv_title"
             android:layout_width="0dp"
@@ -26,51 +31,50 @@
             android:maxLines="1"
             android:text="台词标题"
             android:textColor="#FFFFFF"
-            android:textSize="16sp"
+            android:textSize="15sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@id/btn_delete"
+            app:layout_constraintEnd_toStartOf="@id/tv_date"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- 删除按钮 (右上角静音级灰度，防误触) -->
-        <ImageView
-            android:id="@+id/btn_delete"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:padding="6dp"
-            android:src="@drawable/ic_delete"
-            app:tint="#66FFFFFF"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:contentDescription="删除台词"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+        <!-- 日期时间 (右上角横向排布，不挤占底部标签) -->
+        <TextView
+            android:id="@+id/tv_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:singleLine="true"
+            android:text="2024.04.12 15:30"
+            android:textColor="#66FFFFFF"
+            android:textSize="11sp"
+            app:layout_constraintBaseline_toBaselineOf="@id/tv_title"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- 3行台词摘要正文 -->
+        <!-- 2行台词正文精要 (去繁化简，卡片高度大幅降低) -->
         <TextView
             android:id="@+id/tv_preview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="6dp"
             android:ellipsize="end"
-            android:maxLines="3"
-            android:lineSpacingExtra="3dp"
-            android:text="台词正文摘要预览，最多显示三行内容..."
-            android:textColor="#A0FFFFFF"
+            android:lineSpacingExtra="2dp"
+            android:maxLines="2"
+            android:text="台词正文摘要预览，最多显示两行内容..."
+            android:textColor="#99FFFFFF"
             android:textSize="13sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_title" />
 
-        <!-- 底部标签栏：字数、时长与更新日期 -->
+        <!-- 底部左侧：时长与字数标签 (纯横向排列，不换行) -->
         <LinearLayout
             android:id="@+id/ll_tags"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
+            android:layout_marginTop="10dp"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/ll_actions"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_preview">
 
@@ -79,9 +83,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_tag_pill"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="3dp"
-                android:text="⏱ 约 45 秒"
+                android:paddingHorizontal="7dp"
+                android:paddingVertical="2dp"
+                android:text="⏱ 45 秒"
                 android:textColor="#38EF7D"
                 android:textSize="11sp" />
 
@@ -91,23 +95,14 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="6dp"
                 android:background="@drawable/bg_tag_pill"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="3dp"
+                android:paddingHorizontal="7dp"
+                android:paddingVertical="2dp"
                 android:text="180 字"
                 android:textColor="#80FFFFFF"
                 android:textSize="11sp" />
-
-            <TextView
-                android:id="@+id/tv_date"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="2024.04.12"
-                android:textColor="#50FFFFFF"
-                android:textSize="11sp" />
         </LinearLayout>
 
-        <!-- 快捷操作区：全屏开播、悬浮提词 -->
+        <!-- 底部右侧：全屏、删除、悬浮开播 -->
         <LinearLayout
             android:id="@+id/ll_actions"
             android:layout_width="wrap_content"
@@ -118,32 +113,45 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/ll_tags">
 
-            <!-- 全屏演播室按钮 -->
+            <!-- 删除按钮 -->
+            <ImageView
+                android:id="@+id/btn_delete"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:padding="6dp"
+                android:src="@drawable/ic_delete"
+                app:tint="#66FFFFFF"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="删除台词" />
+
+            <!-- 全屏提词板按钮 -->
             <ImageView
                 android:id="@+id/btn_board"
-                android:layout_width="34dp"
-                android:layout_height="34dp"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_marginStart="6dp"
                 android:background="@drawable/bg_segmented_capsule"
-                android:padding="7dp"
+                android:padding="6dp"
                 android:src="@drawable/ic_fullscreen"
-                app:tint="#80FFFFFF"
+                app:tint="#99FFFFFF"
                 android:contentDescription="全屏提词板" />
 
-            <!-- 悬浮提词一键开播大胶囊 -->
+            <!-- 悬浮提词一键开播小药丸 -->
             <LinearLayout
                 android:id="@+id/btn_float"
                 android:layout_width="wrap_content"
-                android:layout_height="34dp"
+                android:layout_height="28dp"
                 android:layout_marginStart="8dp"
                 android:background="@drawable/bg_btn_accent_pill"
                 android:gravity="center"
-                android:paddingHorizontal="12dp"
+                android:paddingHorizontal="10dp"
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:layout_width="14dp"
-                    android:layout_height="14dp"
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
                     android:src="@drawable/ic_play"
+                    android:tint="#000000"
                     app:tint="#000000" />
 
                 <TextView
@@ -152,7 +160,7 @@
                     android:layout_marginStart="4dp"
                     android:text="悬浮开播"
                     android:textColor="#000000"
-                    android:textSize="12sp"
+                    android:textSize="11sp"
                     android:textStyle="bold" />
             </LinearLayout>
         </LinearLayout>

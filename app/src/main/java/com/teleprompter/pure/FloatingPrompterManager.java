@@ -59,6 +59,7 @@ public class FloatingPrompterManager {
     private ScriptEntity mCurrentScript;
     private int mCurrentBgColor = 0xFF12141A;
     private int mCurrentOpacity = 75;
+    private float mCurrentRotation = 0f;
 
     private FloatingPrompterManager() {}
 
@@ -129,12 +130,16 @@ public class FloatingPrompterManager {
         View dragTouchWrapper = rootFloatView.findViewById(R.id.drag_handle_touch_wrapper);
         ImageView btnClose = rootFloatView.findViewById(R.id.btn_close);
         ImageView btnMinimize = rootFloatView.findViewById(R.id.btn_minimize);
+        ImageView btnRotate = rootFloatView.findViewById(R.id.btn_rotate);
         ImageView btnReset = rootFloatView.findViewById(R.id.btn_reset);
         ImageView btnScaleCorner = rootFloatView.findViewById(R.id.btn_scale_corner);
 
         ImageView tabLeft = rootFloatView.findViewById(R.id.tab_align_left);
         ImageView tabCenter = rootFloatView.findViewById(R.id.tab_align_center);
         ImageView tabRight = rootFloatView.findViewById(R.id.tab_align_right);
+
+        // 确保播放/暂停按钮图标为醒目纯黑，绝不空白
+        mBtnPlayPause.setColorFilter(Color.BLACK);
 
         // 1. 恢复用户保存的窗口尺寸或默认尺寸
         restoreSavedWindowDimensions(activity);
@@ -168,6 +173,7 @@ public class FloatingPrompterManager {
             @Override
             public void onPlayStateChanged(boolean isPlaying) {
                 mBtnPlayPause.setImageResource(isPlaying ? R.drawable.ic_pause : R.drawable.ic_play);
+                mBtnPlayPause.setColorFilter(Color.BLACK);
             }
 
             @Override
@@ -176,6 +182,7 @@ public class FloatingPrompterManager {
             @Override
             public void onReset() {
                 mBtnPlayPause.setImageResource(R.drawable.ic_play);
+                mBtnPlayPause.setColorFilter(Color.BLACK);
                 mTvCountdownOverlay.setVisibility(View.GONE);
             }
 
@@ -206,10 +213,17 @@ public class FloatingPrompterManager {
         // 10. 播放/暂停
         mBtnPlayPause.setOnClickListener(v -> mScrollView.togglePlayPause());
 
-        // 11. 一键重置回到首句
+        // 11. 旋转悬浮视窗 (0° -> 90° -> 180° -> 270° -> 0°)
+        btnRotate.setOnClickListener(v -> {
+            mCurrentRotation = (mCurrentRotation + 90f) % 360f;
+            mPrompterCard.setRotation(mCurrentRotation);
+            Toast.makeText(activity, "视窗已旋转 " + ((int) mCurrentRotation) + "°", Toast.LENGTH_SHORT).show();
+        });
+
+        // 12. 一键重置回到首句
         btnReset.setOnClickListener(v -> mScrollView.resetToStart(true));
 
-        // 12. 纯图标对齐切换
+        // 13. 纯图标对齐切换
         tabLeft.setOnClickListener(v -> {
             mScrollView.setTextAlignmentMode(SmoothTextScrollView.ALIGN_LEFT);
             updateAlignmentIconUI(tabLeft, tabCenter, tabRight, SmoothTextScrollView.ALIGN_LEFT);
@@ -223,7 +237,7 @@ public class FloatingPrompterManager {
             updateAlignmentIconUI(tabLeft, tabCenter, tabRight, SmoothTextScrollView.ALIGN_RIGHT);
         });
 
-        // 13. 左上角退出
+        // 14. 左上角退出
         btnClose.setOnClickListener(v -> dismiss());
     }
 
@@ -441,6 +455,7 @@ public class FloatingPrompterManager {
         if (mScrollView != null) {
             mScrollView.pauseScroll();
         }
+        mCurrentRotation = 0f;
         EasyFloat.dismiss(FLOAT_TAG);
         mRootFloatView = null;
         mPrompterCard = null;

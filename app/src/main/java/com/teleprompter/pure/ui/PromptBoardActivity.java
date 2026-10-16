@@ -1,5 +1,8 @@
 package com.teleprompter.pure.ui;
 
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
@@ -24,9 +27,10 @@ import java.util.concurrent.Executors;
  * 核心特性：
  * 1. 纯黑 OLED 节能抗反光背景
  * 2. 屏幕常亮 (FLAG_KEEP_SCREEN_ON) 绝不灭屏
- * 3. 视觉黄金参考线精准垂直居中
+ * 3. 视觉黄金参考线精准垂直居中，首句启动即居中对齐
  * 4. 光学分光镜镜像翻转 (一键左右翻转)
- * 5. 手势自由滑词定位与一键回到首句
+ * 5. 一键屏幕旋转 (横竖屏快速切换)
+ * 6. 手势自由滑词定位与一键回到首句
  */
 public class PromptBoardActivity extends AppCompatActivity {
 
@@ -36,6 +40,7 @@ public class PromptBoardActivity extends AppCompatActivity {
     private TextView mTvTitle;
     private TextView mTvCountdown;
     private TextView mBtnMirror;
+    private TextView mBtnRotate;
     private ImageView mBtnReset;
     private ImageView mBtnPlayPause;
     private View mBtnBack;
@@ -64,6 +69,7 @@ public class PromptBoardActivity extends AppCompatActivity {
         mTvTitle = findViewById(R.id.tv_board_title);
         mTvCountdown = findViewById(R.id.tv_board_countdown);
         mBtnMirror = findViewById(R.id.btn_toggle_mirror);
+        mBtnRotate = findViewById(R.id.btn_toggle_orientation);
         mBtnReset = findViewById(R.id.btn_board_reset);
         mBtnPlayPause = findViewById(R.id.btn_board_play_pause);
         mBtnBack = findViewById(R.id.btn_board_back);
@@ -74,6 +80,9 @@ public class PromptBoardActivity extends AppCompatActivity {
 
         // 默认居中对齐
         mScrollView.setTextAlignmentMode(SmoothTextScrollView.ALIGN_CENTER);
+
+        // 确保播放/暂停按钮图标为醒目纯黑，绝不空白
+        mBtnPlayPause.setColorFilter(Color.BLACK);
 
         // 读取全局偏好配置
         int speed = PrompterPreferences.getScrollSpeed(this);
@@ -94,6 +103,9 @@ public class PromptBoardActivity extends AppCompatActivity {
     private void setupListeners() {
         mBtnBack.setOnClickListener(v -> finish());
 
+        // 旋转屏幕 (横竖屏快速无感切换)
+        mBtnRotate.setOnClickListener(v -> toggleScreenOrientation());
+
         // 镜像翻转
         mBtnMirror.setOnClickListener(v -> {
             mScrollView.toggleMirror();
@@ -113,6 +125,7 @@ public class PromptBoardActivity extends AppCompatActivity {
             @Override
             public void onPlayStateChanged(boolean isPlaying) {
                 mBtnPlayPause.setImageResource(isPlaying ? R.drawable.ic_pause : R.drawable.ic_play);
+                mBtnPlayPause.setColorFilter(Color.BLACK);
             }
 
             @Override
@@ -121,6 +134,7 @@ public class PromptBoardActivity extends AppCompatActivity {
             @Override
             public void onReset() {
                 mBtnPlayPause.setImageResource(R.drawable.ic_play);
+                mBtnPlayPause.setColorFilter(Color.BLACK);
                 mTvCountdown.setVisibility(View.GONE);
             }
 
@@ -140,6 +154,17 @@ public class PromptBoardActivity extends AppCompatActivity {
         mTabLeft.setOnClickListener(v -> setAlignmentUI(SmoothTextScrollView.ALIGN_LEFT));
         mTabCenter.setOnClickListener(v -> setAlignmentUI(SmoothTextScrollView.ALIGN_CENTER));
         mTabRight.setOnClickListener(v -> setAlignmentUI(SmoothTextScrollView.ALIGN_RIGHT));
+    }
+
+    private void toggleScreenOrientation() {
+        int currentOrientation = getResources().getConfiguration().orientation;
+        if (currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            Toast.makeText(this, "已旋转为竖屏显示", Toast.LENGTH_SHORT).show();
+        } else {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+            Toast.makeText(this, "已旋转为横屏显示", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void setAlignmentUI(int mode) {

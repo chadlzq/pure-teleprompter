@@ -106,10 +106,10 @@ public class ScriptManagerActivity extends AppCompatActivity implements ScriptDr
             startActivity(intent);
         });
 
-        // 3. 导入 TXT
+        // 3. 导入 TXT (严格限定 text/plain MIME 类型，文件选择器只展示 txt 文件)
         findViewById(R.id.card_import_txt).setOnClickListener(v -> {
             try {
-                mOpenDocLauncher.launch(new String[]{"text/plain", "*/*"});
+                mOpenDocLauncher.launch(new String[]{"text/plain"});
             } catch (Exception e) {
                 Toast.makeText(this, "无法唤起系统文件选择器", Toast.LENGTH_SHORT).show();
             }
@@ -130,8 +130,9 @@ public class ScriptManagerActivity extends AppCompatActivity implements ScriptDr
                         + "1. 点击卡片右侧绿色的「悬浮开播」，即可在任意短视频、相机应用上方悬浮提词；\n"
                         + "2. 拖动悬浮窗顶部中央手柄，可随心移动位置（推荐放在前置摄像头正下方，眼神更聚焦自然）；\n"
                         + "3. 拖动悬浮窗右下角角标可自由缩放视窗大小；点击「-」可收起为小圆球，随时轻触唤回；\n"
-                        + "4. 点击主页右上角「⚙ 设置」，可自由调节字号大小、字体颜色、背景透明度、滚动语速与分光镜镜像翻转；\n"
-                        + "5. 点击上方「新建台词」或「导入 TXT」，即可将你的口播稿件随时保存与演练！\n\n"
+                        + "4. 悬浮窗与全屏板均支持一键「🔄 旋转」，无论横屏还是竖屏录制都能完美顺应视线；\n"
+                        + "5. 点击主页右上角「⚙ 设置」，可自由调节字号大小、字体颜色、背景透明度与分光镜镜像翻转；\n"
+                        + "6. 点击上方「新建台词」或「导入 TXT」，即可将你的口播稿件随时保存与演练！\n\n"
                         + "祝你镜头感满满，口播一次过！";
                 tutorial.wordCount = tutorial.content.replaceAll("\\s+", "").length();
                 tutorial.estimatedSec = Math.max(5, tutorial.wordCount / 4);
@@ -179,8 +180,15 @@ public class ScriptManagerActivity extends AppCompatActivity implements ScriptDr
                     cursor.close();
                 }
 
-                // 检查后缀
-                if (fileName.toLowerCase().endsWith(".txt")) {
+                // 严格校验是否为 .txt 文件，若不是则拒绝并提示，防止用户选错非文本文件导致崩溃
+                String lowerName = fileName.toLowerCase();
+                String mimeType = getContentResolver().getType(uri);
+                if (!lowerName.endsWith(".txt") && (mimeType != null && !mimeType.startsWith("text/"))) {
+                    showToastOnMain("请选择标准 .txt 格式文本文件");
+                    return;
+                }
+
+                if (lowerName.endsWith(".txt")) {
                     fileName = fileName.substring(0, fileName.length() - 4);
                 }
 

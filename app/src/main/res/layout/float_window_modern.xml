@@ -166,6 +166,18 @@
                 android:layout_height="1dp"
                 android:layout_weight="1" />
 
+            <!-- 旋转提示词视窗按键 (纯图标 🔄) -->
+            <ImageView
+                android:id="@+id/btn_rotate"
+                android:layout_width="30dp"
+                android:layout_height="28dp"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/bg_segmented_capsule"
+                android:padding="6dp"
+                android:src="@drawable/ic_rotate"
+                app:tint="#FFFFFF"
+                android:contentDescription="旋转提示词视窗" />
+
             <!-- 一键重置首句按键 (纯图标 ↺) -->
             <ImageView
                 android:id="@+id/btn_reset"
@@ -175,16 +187,19 @@
                 android:background="@drawable/bg_segmented_capsule"
                 android:padding="6dp"
                 android:src="@drawable/ic_reset"
+                app:tint="#FFFFFF"
                 android:contentDescription="回到首句" />
 
             <!-- 播放/暂停按键 (纯图标 ▶ / ⏸) -->
             <ImageView
                 android:id="@+id/btn_play_pause"
-                android:layout_width="36dp"
+                android:layout_width="38dp"
                 android:layout_height="28dp"
                 android:background="@drawable/bg_btn_accent_pill"
                 android:padding="6dp"
                 android:src="@drawable/ic_play"
+                android:tint="#000000"
+                app:tint="#000000"
                 android:contentDescription="播放与暂停" />
 
             <!-- 右下角缩放拉伸角标 (Corner Resize Grip) -->

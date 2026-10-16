@@ -149,7 +149,8 @@ public class ScriptEditorActivity extends AppCompatActivity {
         // 导入 TXT
         mBtnImportTxt.setOnClickListener(v -> {
             try {
-                mOpenFileLauncher.launch(new String[]{"text/plain", "*/*"});
+                // 仅筛选 txt 文本文件
+                mOpenFileLauncher.launch(new String[]{"text/plain"});
             } catch (Exception e) {
                 Toast.makeText(this, "无法打开系统文件选择器", Toast.LENGTH_SHORT).show();
             }
@@ -202,7 +203,15 @@ public class ScriptEditorActivity extends AppCompatActivity {
                     cursor.close();
                 }
 
-                if (fileName.toLowerCase().endsWith(".txt")) {
+                // 严格校验是否为 .txt 文件，若不是则拒绝并提示，防止用户选错非文本文件导致崩溃
+                String lowerName = fileName.toLowerCase();
+                String mimeType = getContentResolver().getType(uri);
+                if (!lowerName.endsWith(".txt") && (mimeType != null && !mimeType.startsWith("text/"))) {
+                    mMainHandler.post(() -> Toast.makeText(this, "请选择标准 .txt 格式文本文件", Toast.LENGTH_SHORT).show());
+                    return;
+                }
+
+                if (lowerName.endsWith(".txt")) {
                     fileName = fileName.substring(0, fileName.length() - 4);
                 }
 
