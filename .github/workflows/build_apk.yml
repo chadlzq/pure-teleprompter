@@ -1,0 +1,36 @@
+name: 云端全自动打包 APK (Build Teleprompter APK)
+
+on:
+  push:
+    branches: [ "**" ]
+  workflow_dispatch: # 支持在 GitHub 网页上一键手动点击触发打包
+
+jobs:
+  build:
+    name: 编译 Android 安装包
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 检出项目源代码 (Checkout)
+      uses: actions/checkout@v4
+
+    - name: 配置 JDK 17 运行环境
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: 自动初始化 Gradle Wrapper 构建引擎
+      run: |
+        gradle wrapper --gradle-version 8.2
+        chmod +x gradlew
+
+    - name: 编译极简提词器 APK
+      run: ./gradlew assembleDebug --stacktrace
+
+    - name: 上传安装包供手机下载 (Upload APK)
+      uses: actions/upload-artifact@v4
+      with:
+        name: 极简悬浮提词器-真机安装包
+        path: app/build/outputs/apk/debug/*.apk
+        retention-days: 30

@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+    极简全能设置面板 (dialog_prompter_settings.xml)
+    定制特性：
+    1. 丰富的文字颜色调色板 (包含纯黑、纯白、柠檬黄、薄荷绿、青色、活力橙、粉红)
+    2. 悬浮窗背景底色调色盘 (深空黑、极简白、磨砂藏青、护眼深绿、摄影炭灰)
+    3. 悬浮窗背景透明度滑块 (0% ~ 100%)
+    4. 滚动语速滑块与字号滑块
+    5. 分光镜镜像翻转与倒计时设置
+-->
+<LinearLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_modern_prompter_glass"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <!-- 顶部拖拽把手 -->
+    <View
+        android:layout_width="36dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="14dp"
+        android:background="#33FFFFFF" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="14dp"
+        android:text="提词器偏好设置"
+        android:textColor="#FFFFFF"
+        android:textSize="15sp"
+        android:textStyle="bold" />
+
+    <!-- 1. 【新增】：文字颜色选择 (含纯黑、纯白等7种精心配色) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:layout_marginBottom="14dp">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="文字颜色 (含黑色)"
+            android:textColor="#CCFFFFFF"
+            android:textSize="13sp" />
+
+        <HorizontalScrollView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:scrollbars="none">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <!-- 纯白 -->
+                <View
+                    android:id="@+id/color_text_white"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/bg_btn_accent_pill"
+                    android:backgroundTint="#FFFFFF" />
+                <!-- 纯黑 (创作者明确要求) -->
+                <View
+                    android:id="@+id/color_text_black"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/bg_btn_accent_pill"
+                    android:backgroundTint="#000000" />
+                <!-- 柠檬黄 -->
+                <View
+                    android:id="@+id/color_text_yellow"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/bg_btn_accent_pill"
+                    android:backgroundTint="#FFEE58" />
+                <!-- 薄荷绿 -->
+                <View
+                    android:id="@+id/color_text_green"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/bg_btn_accent_pill"
+                    android:backgroundTint="#38EF7D" />
+                <!-- 青色 -->
+                <View
+                    android:id="@+id/color_text_cyan"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/bg_btn_accent_pill"
+                    android:backgroundTint="#00E5FF" />
+                <!-- 活力橙 -->
+                <View
+                    android:id="@+id/color_text_orange"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/bg_btn_accent_pill"
+                    android:backgroundTint="#FF9100" />
+                <!-- 浅粉红 -->
+                <View
+                    android:id="@+id/color_text_pink"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:background="@drawable/bg_btn_accent_pill"
+                    android:backgroundTint="#FF4081" />
+            </LinearLayout>
+        </HorizontalScrollView>
+    </LinearLayout>
+
+    <!-- 2. 【新增】：悬浮窗背景底色选择 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:layout_marginBottom="14dp">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="背景底色"
+            android:textColor="#CCFFFFFF"
+            android:textSize="13sp" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <!-- 深空黑 -->
+            <View
+                android:id="@+id/color_bg_dark"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/bg_btn_accent_pill"
+                android:backgroundTint="#12141A" />
+            <!-- 极简白 -->
+            <View
+                android:id="@+id/color_bg_white"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/bg_btn_accent_pill"
+                android:backgroundTint="#FFFFFF" />
+            <!-- 藏青 -->
+            <View
+                android:id="@+id/color_bg_navy"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/bg_btn_accent_pill"
+                android:backgroundTint="#0D1B2A" />
+            <!-- 深绿 -->
+            <View
+                android:id="@+id/color_bg_green"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/bg_btn_accent_pill"
+                android:backgroundTint="#0C1E14" />
+            <!-- 炭灰 -->
+            <View
+                android:id="@+id/color_bg_gray"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:background="@drawable/bg_btn_accent_pill"
+                android:backgroundTint="#282A36" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 3. 背景透明度 -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="背景透明度"
+            android:textColor="#CCFFFFFF"
+            android:textSize="13sp" />
+        <TextView
+            android:id="@+id/tv_opacity_val"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:text="75%"
+            android:textColor="#38EF7D"
+            android:textSize="13sp" />
+    </RelativeLayout>
+    <SeekBar
+        android:id="@+id/sb_opacity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="12dp"
+        android:max="100"
+        android:progress="75"
+        android:progressTint="#38EF7D"
+        android:thumbTint="#FFFFFF" />
+
+    <!-- 4. 滚动语速 -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="滚动语速"
+            android:textColor="#CCFFFFFF"
+            android:textSize="13sp" />
+        <TextView
+            android:id="@+id/tv_speed_val"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:text="30"
+            android:textColor="#38EF7D"
+            android:textSize="13sp" />
+    </RelativeLayout>
+    <SeekBar
+        android:id="@+id/sb_speed"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="12dp"
+        android:max="100"
+        android:progress="30"
+        android:progressTint="#38EF7D"
+        android:thumbTint="#FFFFFF" />
+
+    <!-- 5. 字体大小 -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="台词字号"
+            android:textColor="#CCFFFFFF"
+            android:textSize="13sp" />
+        <TextView
+            android:id="@+id/tv_font_val"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:text="22 sp"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp" />
+    </RelativeLayout>
+    <SeekBar
+        android:id="@+id/sb_font_size"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="12dp"
+        android:max="40"
+        android:progress="22"
+        android:progressTint="#FFFFFF"
+        android:thumbTint="#FFFFFF" />
+
+    <!-- 6. 镜像翻转开关 -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="分光镜光学镜像模式"
+            android:textColor="#CCFFFFFF"
+            android:textSize="13sp" />
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switch_mirror"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true" />
+    </RelativeLayout>
+
+    <!-- 7. 倒计时开关 -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="3-2-1 启动准备倒计时"
+            android:textColor="#CCFFFFFF"
+            android:textSize="13sp" />
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switch_countdown"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:checked="true" />
+    </RelativeLayout>
+
+</LinearLayout>

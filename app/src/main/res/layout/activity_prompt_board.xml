@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+    全新设计：全屏演播室提词大板 (activity_prompt_board.xml)
+    特色：纯黑防反光黑屏、防灭屏常亮、自动横竖屏旋转、支持分光镜镜像翻转与大触控播放
+-->
+<androidx.constraintlayout.widget.ConstraintLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000">
+
+    <!-- 顶部状态与功能栏 -->
+    <RelativeLayout
+        android:id="@+id/board_top_bar"
+        android:layout_width="match_parent"
+        android:layout_height="54dp"
+        android:paddingHorizontal="16dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/btn_board_back"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:layout_centerVertical="true"
+            android:padding="8dp"
+            android:src="@drawable/ic_arrow_back"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="退出全屏" />
+
+        <TextView
+            android:id="@+id/tv_board_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="全屏提词板"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <!-- 顶部快速镜像翻转按键 -->
+        <TextView
+            android:id="@+id/btn_toggle_mirror"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/bg_segmented_capsule"
+            android:gravity="center"
+            android:paddingHorizontal="12dp"
+            android:text="🪞 镜像"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp" />
+    </RelativeLayout>
+
+    <!-- 视线黄金参考线 -->
+    <View
+        android:id="@+id/board_focal_line"
+        android:layout_width="match_parent"
+        android:layout_height="1.5dp"
+        android:layout_marginTop="90dp"
+        android:background="#2638EF7D"
+        app:layout_constraintTop_toBottomOf="@id/board_top_bar" />
+
+    <!-- 3-2-1 准备倒计时大字覆盖层 -->
+    <TextView
+        android:id="@+id/tv_board_countdown"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="96sp"
+        android:textColor="#38EF7D"
+        android:textStyle="bold"
+        android:elevation="20dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- 核心全屏平滑滚屏区 -->
+    <com.teleprompter.pure.ui.SmoothTextScrollView
+        android:id="@+id/board_scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/board_top_bar"
+        app:layout_constraintBottom_toTopOf="@id/board_bottom_bar" />
+
+    <!-- 底部控制面板 -->
+    <LinearLayout
+        android:id="@+id/board_bottom_bar"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:background="#12131A"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="20dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <!-- 三段式对齐切换器 -->
+        <LinearLayout
+            android:id="@+id/board_align_capsule"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:background="@drawable/bg_segmented_capsule"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="2dp">
+            <TextView
+                android:id="@+id/board_tab_left"
+                android:layout_width="36dp"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="左"
+                android:textColor="#80FFFFFF"
+                android:textSize="12sp" />
+            <TextView
+                android:id="@+id/board_tab_center"
+                android:layout_width="36dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_segment_active_pill"
+                android:gravity="center"
+                android:text="中"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="12sp" />
+            <TextView
+                android:id="@+id/board_tab_right"
+                android:layout_width="36dp"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="右"
+                android:textColor="#80FFFFFF"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <!-- 一键重置回到首句 -->
+        <ImageView
+            android:id="@+id/btn_board_reset"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/bg_segmented_capsule"
+            android:padding="10dp"
+            android:src="@drawable/ic_reset"
+            android:contentDescription="回到首句" />
+
+        <!-- 播放/暂停控制大胶囊 -->
+        <ImageView
+            android:id="@+id/btn_board_play_pause"
+            android:layout_width="56dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_btn_accent_pill"
+            android:padding="8dp"
+            android:src="@drawable/ic_play"
+            android:contentDescription="播放" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

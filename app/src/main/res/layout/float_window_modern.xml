@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+    极简纯净版：悬浮提词器 (float_window_modern.xml)
+    根据创作者反馈定制：
+    1. 左上角退出按钮，去掉中间标题显示，界面极度纯净
+    2. 无文字视线指示细线，视线无干扰
+    3. 去掉文字标签，对齐切换全面采用现代扁平图标 (左对齐/居中/右对齐)
+    4. 纯图标大触控播放与重置按钮
+-->
+<androidx.constraintlayout.widget.ConstraintLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/float_root"
+    android:layout_width="310dp"
+    android:layout_height="250dp"
+    android:background="@drawable/bg_modern_prompter_glass"
+    android:padding="10dp">
+
+    <!-- 顶部状态栏：仅保留左上角关闭与右上角微型设置，彻底去除中间标题 -->
+    <ImageView
+        android:id="@+id/btn_close"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:padding="6dp"
+        android:src="@drawable/ic_close"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:contentDescription="退出悬浮窗"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/btn_settings"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:padding="6dp"
+        android:src="@drawable/ic_settings"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:contentDescription="设置"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- 纯净黄金对焦参考线 (居中放置在浮窗正中间) -->
+    <View
+        android:id="@+id/focal_line"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#2638EF7D"
+        app:layout_constraintTop_toTopOf="@id/text_scroll_view"
+        app:layout_constraintBottom_toBottomOf="@id/text_scroll_view" />
+
+    <!-- 核心文字平滑滚动区 -->
+    <com.teleprompter.pure.ui.SmoothTextScrollView
+        android:id="@+id/text_scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="6dp"
+        app:layout_constraintBottom_toTopOf="@id/bottom_control_bar"
+        app:layout_constraintTop_toBottomOf="@id/btn_close" />
+
+    <!-- 3-2-1 启动倒计时大字居中动画覆盖层 (无阻碍) -->
+    <TextView
+        android:id="@+id/tv_countdown_overlay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="64sp"
+        android:textColor="#38EF7D"
+        android:textStyle="bold"
+        android:elevation="12dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- 底部控制栏：纯图标胶囊，去除所有中文冗余字符 -->
+    <LinearLayout
+        android:id="@+id/bottom_control_bar"
+        android:layout_width="match_parent"
+        android:layout_height="36dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <!-- 纯图标三段式对齐胶囊 (左对齐图标 | 居中图标 | 右对齐图标) -->
+        <LinearLayout
+            android:id="@+id/layout_align_toggle"
+            android:layout_width="wrap_content"
+            android:layout_height="28dp"
+            android:background="@drawable/bg_segmented_capsule"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="2dp">
+
+            <ImageView
+                android:id="@+id/tab_align_left"
+                android:layout_width="28dp"
+                android:layout_height="match_parent"
+                android:padding="5dp"
+                android:src="@drawable/ic_format_align_left"
+                app:tint="#80FFFFFF"
+                android:contentDescription="左对齐" />
+
+            <ImageView
+                android:id="@+id/tab_align_center"
+                android:layout_width="28dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_segment_active_pill"
+                android:padding="5dp"
+                android:src="@drawable/ic_format_align_center"
+                app:tint="#FFFFFF"
+                android:contentDescription="居中对齐" />
+
+            <ImageView
+                android:id="@+id/tab_align_right"
+                android:layout_width="28dp"
+                android:layout_height="match_parent"
+                android:padding="5dp"
+                android:src="@drawable/ic_format_align_right"
+                app:tint="#80FFFFFF"
+                android:contentDescription="右对齐" />
+        </LinearLayout>
+
+        <!-- 弹性占位 -->
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <!-- 一键重置首句按键 (纯图标 ↺) -->
+        <ImageView
+            android:id="@+id/btn_reset"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/bg_segmented_capsule"
+            android:padding="7dp"
+            android:src="@drawable/ic_reset"
+            android:contentDescription="回到首句" />
+
+        <!-- 播放/暂停按键 (纯图标 ▶ / ⏸) -->
+        <ImageView
+            android:id="@+id/btn_play_pause"
+            android:layout_width="38dp"
+            android:layout_height="32dp"
+            android:background="@drawable/bg_btn_accent_pill"
+            android:padding="7dp"
+            android:src="@drawable/ic_play"
+            android:contentDescription="播放与暂停" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,48 @@
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:background="@7F08008B" android:layout_width="-1" android:layout_height="-2">
+  <ScrollView android:id="@7F0A0228" android:layout_width="0.000000dip" android:layout_height="-2" android:layout_marginTop="32.000000dip" android:paddingStart="16.000000dip" android:paddingEnd="16.000000dip" app:layout_constraintBottom_toBottomOf="0" app:layout_constraintEnd_toEndOf="0" app:layout_constraintStart_toStartOf="0" app:layout_constraintTop_toTopOf="0">
+    <androidx.appcompat.widget.LinearLayoutCompat android:orientation="1" android:layout_width="-1" android:layout_height="-2">
+      <androidx.appcompat.widget.LinearLayoutCompat android:gravity="0x00000010" android:layout_width="-1" android:layout_height="-2">
+        <TextView android:textSize="16.000000dip" android:textColor="@7F060371" android:layout_width="-2" android:layout_height="-2" android:text="@7F120172"/>
+      </androidx.appcompat.widget.LinearLayoutCompat>
+      <com.litao.slider.NiftySlider android:value="1" android:id="@7F0A01EB" android:layout_width="-1" android:layout_height="-2" android:stepSize="0.500000" android:valueFrom="-8" android:valueTo="20" app:enableDrawHalo="false" app:haloColor="@7F060034" app:thumbColor="@7F060371" app:thumbHeight="28.000000dip" app:thumbRadius="14.000000dip" app:thumbShadowColor="@7F060371" app:thumbTextColor="@7F060049" app:thumbTextSize="13.000000dip" app:thumbWithinTrackBounds="true" app:ticksVisible="false" app:trackColor="@7F060039" app:trackColorInactive="@7F060034" app:trackHeight="12.000000dip" app:trackSecondaryColor="@7F0600A5"/>
+      <View android:background="@7F0600A5" android:layout_width="-1" android:layout_height="1.000000px" android:layout_marginTop="8.000000dip" android:layout_marginBottom="8.000000dip"/>
+      <androidx.appcompat.widget.LinearLayoutCompat android:gravity="0x00000010" android:layout_width="-1" android:layout_height="-2">
+        <TextView android:textSize="16.000000dip" android:textColor="@7F060371" android:layout_width="-2" android:layout_height="-2" android:text="@7F12017B"/>
+      </androidx.appcompat.widget.LinearLayoutCompat>
+      <com.litao.slider.NiftySlider android:value="14" android:id="@7F0A01ED" android:layout_width="-1" android:layout_height="-2" android:valueFrom="1" android:valueTo="100" app:enableDrawHalo="false" app:haloColor="@7F060034" app:thumbColor="@7F060371" app:thumbHeight="28.000000dip" app:thumbRadius="14.000000dip" app:thumbShadowColor="@7F060371" app:thumbTextColor="@7F06034A" app:thumbTextSize="14.000000dip" app:thumbWithinTrackBounds="true" app:ticksVisible="false" app:trackColor="@7F060039" app:trackColorInactive="@7F060034" app:trackHeight="12.000000dip" app:trackSecondaryColor="@7F0600A5"/>
+      <View android:background="@7F0600A5" android:layout_width="-1" android:layout_height="1.000000px" android:layout_marginTop="8.000000dip" android:layout_marginBottom="8.000000dip"/>
+      <androidx.appcompat.widget.LinearLayoutCompat android:gravity="0x00000010" android:layout_width="-1" android:layout_height="-2">
+        <TextView android:textSize="18.000000dip" android:textColor="@7F060371" android:layout_width="-2" android:layout_height="-2" android:text="@7F12017A"/>
+      </androidx.appcompat.widget.LinearLayoutCompat>
+      <androidx.recyclerview.widget.RecyclerView android:id="@7F0A02AA" android:layout_width="-1" android:layout_height="36.000000dip" android:layout_marginTop="8.000000dip"/>
+      <View android:background="@7F0600A5" android:layout_width="-1" android:layout_height="1.000000px" android:layout_marginTop="8.000000dip" android:layout_marginBottom="8.000000dip"/>
+      <androidx.appcompat.widget.LinearLayoutCompat android:gravity="0x00000010" android:layout_width="-1" android:layout_height="-2">
+        <TextView android:textSize="18.000000dip" android:textColor="@7F060371" android:layout_width="-2" android:layout_height="-2" android:text="@7F12014F"/>
+      </androidx.appcompat.widget.LinearLayoutCompat>
+      <androidx.recyclerview.widget.RecyclerView android:id="@7F0A0061" android:layout_width="-1" android:layout_height="36.000000dip" android:layout_marginTop="8.000000dip"/>
+      <View android:background="@7F0600A5" android:layout_width="-1" android:layout_height="1.000000px" android:layout_marginTop="8.000000dip" android:layout_marginBottom="8.000000dip"/>
+      <androidx.appcompat.widget.LinearLayoutCompat android:gravity="0x00000010" android:layout_width="-1" android:layout_height="-2">
+        <TextView android:textSize="18.000000dip" android:textColor="@7F060371" android:layout_width="-2" android:layout_height="-2" android:text="@7F12014E"/>
+      </androidx.appcompat.widget.LinearLayoutCompat>
+      <com.litao.slider.NiftySlider android:value="75" android:id="@7F0A01EC" android:layout_width="-1" android:layout_height="-2" android:valueFrom="1" android:valueTo="100" app:enableDrawHalo="false" app:haloColor="@7F060034" app:thumbColor="@7F060371" app:thumbHeight="28.000000dip" app:thumbRadius="14.000000dip" app:thumbShadowColor="@7F060371" app:thumbTextColor="@7F06034A" app:thumbTextSize="14.000000dip" app:thumbWithinTrackBounds="true" app:ticksVisible="false" app:trackColor="@7F060039" app:trackColorInactive="@7F060034" app:trackHeight="12.000000dip" app:trackSecondaryColor="@7F0600A5"/>
+      <View android:id="@7F0A0305" android:background="@7F0600A5" android:visibility="2" android:layout_width="-1" android:layout_height="1.000000px" android:layout_marginTop="8.000000dip" android:layout_marginBottom="8.000000dip"/>
+      <RelativeLayout android:gravity="0x00000010" android:id="@7F0A0304" android:visibility="2" android:layout_width="-1" android:layout_height="-2" android:layout_marginTop="4.000000dip" android:layout_marginBottom="4.000000dip" android:foreground="@7F0800B6">
+        <TextView android:textSize="18.000000dip" android:textColor="@7F060371" android:layout_width="-2" android:layout_height="-2" android:text="@7F12019B" android:layout_centerVertical="true" android:layout_alignParentStart="true"/>
+        <TextView android:textSize="14.000000sp" android:textStyle="0x00000001" android:textColor="@android:0106000B" android:gravity="0x00000011" android:layout_gravity="0x00800015" android:background="@7F080088" android:layout_width="-2" android:layout_height="32.000000dip" android:minWidth="64.000000dip" android:text="@7F120033" android:layout_centerVertical="true" android:textAllCaps="false" android:layout_marginEnd="16.000000dip" android:layout_alignParentEnd="true" android:paddingHorizontal="15.000000dip"/>
+      </RelativeLayout>
+      <View android:background="@7F0600A5" android:layout_width="-1" android:layout_height="1.000000px" android:layout_marginTop="8.000000dip" android:layout_marginBottom="8.000000dip"/>
+      <androidx.appcompat.widget.LinearLayoutCompat android:gravity="0x00000010" android:layout_width="-1" android:layout_height="-2">
+        <TextView android:textSize="16.000000dip" android:textColor="@7F060371" android:layout_width="-2" android:layout_height="-2" android:text="@7F120063"/>
+      </androidx.appcompat.widget.LinearLayoutCompat>
+      <com.litao.slider.NiftySlider android:value="1" android:id="@7F0A00BB" android:layout_width="-1" android:layout_height="-2" android:valueFrom="0" android:valueTo="10" app:enableDrawHalo="false" app:haloColor="@7F060034" app:thumbColor="@7F060371" app:thumbHeight="28.000000dip" app:thumbRadius="14.000000dip" app:thumbShadowColor="@7F060371" app:thumbTextColor="@7F060049" app:thumbTextSize="13.000000dip" app:thumbWithinTrackBounds="true" app:ticksVisible="false" app:trackColor="@7F060039" app:trackColorInactive="@7F060034" app:trackHeight="12.000000dip" app:trackSecondaryColor="@7F0600A5"/>
+      <RelativeLayout android:gravity="0x00000010" android:layout_width="-1" android:layout_height="-2" android:layout_marginBottom="8.000000dip">
+        <TextView android:textSize="16.000000dip" android:textColor="@7F060371" android:layout_width="-2" android:layout_height="-2" android:text="@7F1200F3" android:layout_centerVertical="true" android:layout_alignParentStart="true"/>
+        <androidx.appcompat.widget.SwitchCompat android:id="@7F0A01BF" android:layout_width="-2" android:layout_height="-2" android:checked="false" android:layout_centerVertical="true" android:layout_alignParentEnd="true" app:thumbTint="@7F060371" app:trackTint="@7F060034" style="@7F1304AF"/>
+      </RelativeLayout>
+      <RelativeLayout android:gravity="0x00000010" android:id="@7F0A005F" android:visibility="2" android:layout_width="-1" android:layout_height="-2" android:layout_marginBottom="8.000000dip">
+        <TextView android:textSize="16.000000dip" android:textColor="@7F060371" android:layout_width="-2" android:layout_height="-2" android:text="@7F120151" android:layout_centerVertical="true" android:layout_alignParentStart="true"/>
+        <androidx.appcompat.widget.SwitchCompat android:id="@7F0A005E" android:layout_width="-2" android:layout_height="-2" android:checked="false" android:layout_centerVertical="true" android:layout_alignParentEnd="true" app:thumbTint="@7F060371" app:trackTint="@7F060034" style="@7F1304AF"/>
+      </RelativeLayout>
+    </androidx.appcompat.widget.LinearLayoutCompat>
+  </ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>
