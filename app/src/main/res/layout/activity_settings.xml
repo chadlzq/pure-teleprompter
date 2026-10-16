@@ -396,12 +396,167 @@
                     android:layout_centerVertical="true" />
             </RelativeLayout>
 
+            <!-- 分割线 -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#1AFFFFFF"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="16dp" />
+
+            <!-- 关于与支持分类标题 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="关于与支持"
+                android:textColor="#38EF7D"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="6dp" />
+
+            <!-- 意见反馈 (唤起邮箱或复制邮箱) -->
+            <RelativeLayout
+                android:id="@+id/item_feedback"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="意见反馈"
+                    android:textColor="#FFFFFF"
+                    android:textSize="15sp"
+                    android:layout_centerVertical="true" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="邮件反馈 ➔"
+                    android:textColor="#80FFFFFF"
+                    android:textSize="13sp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true" />
+            </RelativeLayout>
+
+            <!-- 联系作者 -->
+            <RelativeLayout
+                android:id="@+id/item_contact"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="联系作者"
+                    android:textColor="#FFFFFF"
+                    android:textSize="15sp"
+                    android:layout_centerVertical="true" />
+
+                <TextView
+                    android:id="@+id/tv_contact_email"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="chadlzq@gmail.com"
+                    android:textColor="#38EF7D"
+                    android:textSize="13sp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true" />
+            </RelativeLayout>
+
+            <!-- 开源主页 -->
+            <RelativeLayout
+                android:id="@+id/item_github"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="开源主页 (GitHub)"
+                    android:textColor="#FFFFFF"
+                    android:textSize="15sp"
+                    android:layout_centerVertical="true" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="pure-teleprompter ➔"
+                    android:textColor="#80FFFFFF"
+                    android:textSize="13sp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true" />
+            </RelativeLayout>
+
+            <!-- 隐私政策与合规说明 (各平台应用上架审核强制要求) -->
+            <RelativeLayout
+                android:id="@+id/item_privacy"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="隐私政策与免责声明"
+                    android:textColor="#FFFFFF"
+                    android:textSize="15sp"
+                    android:layout_centerVertical="true" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="纯本地承诺 ➔"
+                    android:textColor="#80FFFFFF"
+                    android:textSize="13sp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true" />
+            </RelativeLayout>
+
+            <!-- 关于软件版本 -->
+            <RelativeLayout
+                android:id="@+id/item_about"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="关于极简提词器"
+                    android:textColor="#FFFFFF"
+                    android:textSize="15sp"
+                    android:layout_centerVertical="true" />
+
+                <TextView
+                    android:id="@+id/tv_app_version"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="v1.3.0 (Build 3)"
+                    android:textColor="#80FFFFFF"
+                    android:textSize="13sp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true" />
+            </RelativeLayout>
+
             <!-- 底部合规声明 -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="28dp"
                 android:layout_marginBottom="24dp"
                 android:text="100% 本地纯净运行 · 无任何网络通信 · 保护台词隐私安全"
                 android:textColor="#40FFFFFF"

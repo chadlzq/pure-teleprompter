@@ -8,7 +8,7 @@
     4. 【纯净居中视线标线】：正居中无文字干扰黄金参考线
     5. 【纯图标去文字操作】：左/中/右对齐、重置、播放全部使用扁平高对比度图标
 -->
-<FrameLayout 
+<com.teleprompter.pure.ui.RotatableFloatContainer 
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/float_root"
@@ -231,4 +231,4 @@
             android:contentDescription="展开悬浮提词器" />
     </LinearLayout>
 
-</FrameLayout>
+</com.teleprompter.pure.ui.RotatableFloatContainer>

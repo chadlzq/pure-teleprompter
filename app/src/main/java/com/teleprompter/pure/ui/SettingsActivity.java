@@ -1,7 +1,13 @@
 package com.teleprompter.pure.ui;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -10,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 
@@ -177,6 +184,100 @@ public class SettingsActivity extends AppCompatActivity {
             PrompterPreferences.setMirror(this, isChecked);
             updatePreview();
         });
+
+        // 意见反馈
+        findViewById(R.id.item_feedback).setOnClickListener(v -> sendFeedbackEmail());
+
+        // 联系作者
+        findViewById(R.id.item_contact).setOnClickListener(v -> copyContactInfo());
+
+        // 开源主页
+        findViewById(R.id.item_github).setOnClickListener(v -> openGitHubRepo());
+
+        // 隐私政策与免责声明
+        findViewById(R.id.item_privacy).setOnClickListener(v -> showPrivacyDialog());
+
+        // 关于软件版本
+        findViewById(R.id.item_about).setOnClickListener(v -> showAboutDialog());
+    }
+
+    private void sendFeedbackEmail() {
+        String recipient = "chadlzq@gmail.com";
+        String subject = "【极简提词器】用户反馈与产品建议";
+        String deviceInfo = "\n\n---------------------\n设备机型：" + Build.MANUFACTURER + " " + Build.MODEL +
+                "\n系统版本：Android " + Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + ")" +
+                "\n应用版本：v1.3.0 (Build 3)\n---------------------\n";
+
+        Intent intent = new Intent(Intent.ACTION_SENDTO);
+        intent.setData(Uri.parse("mailto:" + recipient));
+        intent.putExtra(Intent.EXTRA_SUBJECT, subject);
+        intent.putExtra(Intent.EXTRA_TEXT, "请在此输入您的反馈与改进建议：" + deviceInfo);
+
+        try {
+            startActivity(Intent.createChooser(intent, "选择邮件客户端"));
+        } catch (Exception e) {
+            copyToClipboard(recipient);
+            new AlertDialog.Builder(this)
+                    .setTitle("意见反馈")
+                    .setMessage("作者联系邮箱已复制到剪贴板：\n" + recipient + "\n\n欢迎您随时发送邮件提出宝贵建议！")
+                    .setPositiveButton("好的", null)
+                    .show();
+        }
+    }
+
+    private void copyContactInfo() {
+        String email = "chadlzq@gmail.com";
+        copyToClipboard(email);
+        Toast.makeText(this, "作者邮箱已复制：" + email, Toast.LENGTH_SHORT).show();
+    }
+
+    private void openGitHubRepo() {
+        String url = "https://github.com/chadlzq/pure-teleprompter";
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            startActivity(intent);
+        } catch (Exception e) {
+            copyToClipboard(url);
+            Toast.makeText(this, "已复制项目开源地址至剪贴板", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void showPrivacyDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("隐私政策与安全规范声明")
+                .setMessage("【极简提词器 · 100% 纯本地离线承诺】\n\n" +
+                        "1. 绝不联网：本应用安装包未申请任何 INTERNET 网络权限，从底层硬件级别杜绝数据外泄可能。\n\n" +
+                        "2. 本地私有存储：您创建、编辑、导入的所有台词文稿，仅加密保存在手机本地 Room SQLite 数据库中，卸载应用即同步销毁，绝无云端备份。\n\n" +
+                        "3. 零数据采集：不获取手机设备号 (IMEI/OAID/Android ID)、不读取位置与通讯录、不嵌入任何第三方广告或统计分析 SDK。\n\n" +
+                        "4. 必要权限说明：仅需系统悬浮窗权限（用于在录像或直播软件上层浮窗显示提示词），以及导入标准 TXT 文本时的系统文件访问权限。\n\n" +
+                        "符合国内应用商店（酷安、华为、小米、OPPO、vivo 等）及 Google Play 上架合规要求。")
+                .setPositiveButton("我已了解", null)
+                .show();
+    }
+
+    private void showAboutDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("关于 极简提词器")
+                .setMessage("极简提词器 (Pure Teleprompter)\n" +
+                        "版本：v1.3.0 (Build 3)\n" +
+                        "开源许可：Apache-2.0 License\n\n" +
+                        "为个人创作者、短视频口播、演播主持打造的专注利器：\n" +
+                        "• 纯本地离线单机，永无广告与会员套路\n" +
+                        "• 全屏大字演播板 + 悬浮窗自适应旋转\n" +
+                        "• 光学分光镜水平镜像翻转支持\n" +
+                        "• 流畅恒速平滑跟读引擎\n\n" +
+                        "GitHub：chadlzq/pure-teleprompter\n" +
+                        "作者邮箱：chadlzq@gmail.com")
+                .setPositiveButton("确定", null)
+                .show();
+    }
+
+    private void copyToClipboard(String text) {
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        if (clipboard != null) {
+            ClipData clip = ClipData.newPlainText("pure_teleprompter", text);
+            clipboard.setPrimaryClip(clip);
+        }
     }
 
     private void selectTextColor(int color) {

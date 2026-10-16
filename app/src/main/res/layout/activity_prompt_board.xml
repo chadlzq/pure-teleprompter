@@ -2,6 +2,7 @@
 <!-- 
     全新设计：全屏演播室提词大板 (activity_prompt_board.xml)
     特色：纯黑防反光黑屏、防灭屏常亮、自动横竖屏旋转、支持分光镜镜像翻转与大触控播放
+    顶部极简无干扰（仅保留返回键），底部集成全部高频控制（对齐、旋转、镜像、重置、播放）
 -->
 <androidx.constraintlayout.widget.ConstraintLayout 
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -10,69 +11,24 @@
     android:layout_height="match_parent"
     android:background="#000000">
 
-    <!-- 顶部状态与功能栏 -->
-    <RelativeLayout
+    <!-- 顶部状态栏：仅保留极简返回按键，极致沉浸纯净，无任何标题干扰 -->
+    <FrameLayout
         android:id="@+id/board_top_bar"
         android:layout_width="match_parent"
-        android:layout_height="54dp"
-        android:paddingHorizontal="16dp"
+        android:layout_height="52dp"
+        android:paddingHorizontal="14dp"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
             android:id="@+id/btn_board_back"
             android:layout_width="38dp"
             android:layout_height="38dp"
-            android:layout_centerVertical="true"
+            android:layout_gravity="center_vertical|start"
             android:padding="8dp"
             android:src="@drawable/ic_arrow_back"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:contentDescription="退出全屏" />
-
-        <TextView
-            android:id="@+id/tv_board_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="全屏提词板"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <!-- 顶部操作区：旋转屏幕 & 镜像翻转 -->
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <!-- 旋转屏幕 (横竖屏切换) -->
-            <TextView
-                android:id="@+id/btn_toggle_orientation"
-                android:layout_width="wrap_content"
-                android:layout_height="30dp"
-                android:layout_marginEnd="8dp"
-                android:background="@drawable/bg_segmented_capsule"
-                android:gravity="center"
-                android:paddingHorizontal="10dp"
-                android:text="🔄 旋转"
-                android:textColor="#FFFFFF"
-                android:textSize="12sp" />
-
-            <!-- 镜像翻转 -->
-            <TextView
-                android:id="@+id/btn_toggle_mirror"
-                android:layout_width="wrap_content"
-                android:layout_height="30dp"
-                android:background="@drawable/bg_segmented_capsule"
-                android:gravity="center"
-                android:paddingHorizontal="10dp"
-                android:text="🪞 镜像"
-                android:textColor="#FFFFFF"
-                android:textSize="12sp" />
-        </LinearLayout>
-    </RelativeLayout>
+    </FrameLayout>
 
     <!-- 视线黄金参考线 (垂直正居中，与演播视线完美平视) -->
     <View
@@ -106,14 +62,14 @@
         app:layout_constraintTop_toBottomOf="@id/board_top_bar"
         app:layout_constraintBottom_toTopOf="@id/board_bottom_bar" />
 
-    <!-- 底部控制面板 -->
+    <!-- 底部控制面板：对齐、旋转屏幕、镜像翻转、重置首句、播放/暂停全部整合在此 -->
     <LinearLayout
         android:id="@+id/board_bottom_bar"
         android:layout_width="match_parent"
         android:layout_height="64dp"
         android:background="#12131A"
         android:gravity="center_vertical"
-        android:paddingHorizontal="20dp"
+        android:paddingHorizontal="16dp"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent">
 
@@ -128,7 +84,7 @@
             android:padding="2dp">
             <TextView
                 android:id="@+id/board_tab_left"
-                android:layout_width="36dp"
+                android:layout_width="34dp"
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:text="左"
@@ -136,7 +92,7 @@
                 android:textSize="12sp" />
             <TextView
                 android:id="@+id/board_tab_center"
-                android:layout_width="36dp"
+                android:layout_width="34dp"
                 android:layout_height="match_parent"
                 android:background="@drawable/bg_segment_active_pill"
                 android:gravity="center"
@@ -146,7 +102,7 @@
                 android:textSize="12sp" />
             <TextView
                 android:id="@+id/board_tab_right"
-                android:layout_width="36dp"
+                android:layout_width="34dp"
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:text="右"
@@ -154,6 +110,33 @@
                 android:textSize="12sp" />
         </LinearLayout>
 
+        <!-- 旋转屏幕 (横竖屏切换) -->
+        <TextView
+            android:id="@+id/btn_toggle_orientation"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:layout_marginStart="10dp"
+            android:background="@drawable/bg_segmented_capsule"
+            android:gravity="center"
+            android:paddingHorizontal="10dp"
+            android:text="🔄 旋转"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp" />
+
+        <!-- 镜像翻转 -->
+        <TextView
+            android:id="@+id/btn_toggle_mirror"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_segmented_capsule"
+            android:gravity="center"
+            android:paddingHorizontal="10dp"
+            android:text="🪞 镜像"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp" />
+
+        <!-- 弹性空白 -->
         <View
             android:layout_width="0dp"
             android:layout_height="1dp"
@@ -162,19 +145,19 @@
         <!-- 一键重置回到首句 -->
         <ImageView
             android:id="@+id/btn_board_reset"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginEnd="12dp"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:layout_marginEnd="10dp"
             android:background="@drawable/bg_segmented_capsule"
-            android:padding="10dp"
+            android:padding="9dp"
             android:src="@drawable/ic_reset"
             android:contentDescription="回到首句" />
 
         <!-- 播放/暂停控制大胶囊 -->
         <ImageView
             android:id="@+id/btn_board_play_pause"
-            android:layout_width="56dp"
-            android:layout_height="40dp"
+            android:layout_width="52dp"
+            android:layout_height="38dp"
             android:background="@drawable/bg_btn_accent_pill"
             android:padding="8dp"
             android:src="@drawable/ic_play"

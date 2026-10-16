@@ -37,7 +37,6 @@ public class PromptBoardActivity extends AppCompatActivity {
     public static final String EXTRA_SCRIPT_ID = "extra_script_id";
 
     private SmoothTextScrollView mScrollView;
-    private TextView mTvTitle;
     private TextView mTvCountdown;
     private TextView mBtnMirror;
     private TextView mBtnRotate;
@@ -66,7 +65,6 @@ public class PromptBoardActivity extends AppCompatActivity {
 
     private void initViews() {
         mScrollView = findViewById(R.id.board_scroll_view);
-        mTvTitle = findViewById(R.id.tv_board_title);
         mTvCountdown = findViewById(R.id.tv_board_countdown);
         mBtnMirror = findViewById(R.id.btn_toggle_mirror);
         mBtnRotate = findViewById(R.id.btn_toggle_orientation);
@@ -180,7 +178,6 @@ public class PromptBoardActivity extends AppCompatActivity {
                 mScript = AppDatabase.getInstance(this).scriptDao().getScriptById(mScriptId);
                 if (mScript != null) {
                     runOnUiThread(() -> {
-                        mTvTitle.setText(mScript.title);
                         mScrollView.setText(mScript.content);
                     });
                 }

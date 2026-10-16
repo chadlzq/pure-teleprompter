@@ -27,6 +27,7 @@ import com.lzf.easyfloat.interfaces.OnInvokeView;
 import com.lzf.easyfloat.interfaces.OnPermissionResult;
 import com.lzf.easyfloat.permission.PermissionUtils;
 import com.teleprompter.pure.database.ScriptEntity;
+import com.teleprompter.pure.ui.RotatableFloatContainer;
 import com.teleprompter.pure.ui.SmoothTextScrollView;
 
 /**
@@ -51,6 +52,7 @@ public class FloatingPrompterManager {
 
     private SmoothTextScrollView mScrollView;
     private View mRootFloatView;
+    private RotatableFloatContainer mRotatableContainer;
     private ConstraintLayout mPrompterCard;
     private LinearLayout mFloatBallContainer;
     private TextView mTvCountdownOverlay;
@@ -120,6 +122,9 @@ public class FloatingPrompterManager {
     }
 
     private void bindViewEvents(Activity activity, View rootFloatView) {
+        if (rootFloatView instanceof RotatableFloatContainer) {
+            mRotatableContainer = (RotatableFloatContainer) rootFloatView;
+        }
         mPrompterCard = rootFloatView.findViewById(R.id.prompter_card_container);
         mFloatBallContainer = rootFloatView.findViewById(R.id.float_ball_container);
         mScrollView = rootFloatView.findViewById(R.id.text_scroll_view);
@@ -213,11 +218,44 @@ public class FloatingPrompterManager {
         // 10. 播放/暂停
         mBtnPlayPause.setOnClickListener(v -> mScrollView.togglePlayPause());
 
-        // 11. 旋转悬浮视窗 (0° -> 90° -> 180° -> 270° -> 0°)
+        // 11. 自适应旋转悬浮视窗 (0° -> 90° -> 180° -> 270° -> 0°)
+        // 彻底解决按键被裁切、需要手动重新调整大小与位置的问题
         btnRotate.setOnClickListener(v -> {
+            FloatingWindowHelper helper = FloatingWindowManager.INSTANCE.getHelper(FLOAT_TAG);
+            int currentX = 0, currentY = 0;
+            if (helper != null && helper.getParams() != null) {
+                currentX = helper.getParams().x;
+                currentY = helper.getParams().y;
+            }
+
+            int currentContainerW = mRotatableContainer != null ? mRotatableContainer.getWidth() : mPrompterCard.getWidth();
+            int currentContainerH = mRotatableContainer != null ? mRotatableContainer.getHeight() : mPrompterCard.getHeight();
+            int centerX = currentX + currentContainerW / 2;
+            int centerY = currentY + currentContainerH / 2;
+
             mCurrentRotation = (mCurrentRotation + 90f) % 360f;
-            mPrompterCard.setRotation(mCurrentRotation);
-            Toast.makeText(activity, "视窗已旋转 " + ((int) mCurrentRotation) + "°", Toast.LENGTH_SHORT).show();
+            if (mRotatableContainer != null) {
+                mRotatableContainer.setChildRotation(mCurrentRotation);
+            } else {
+                mPrompterCard.setRotation(mCurrentRotation);
+            }
+
+            // 计算旋转后新的测量尺寸
+            int cardW = mPrompterCard.getWidth();
+            int cardH = mPrompterCard.getHeight();
+            boolean isSwapped = (Math.abs(mCurrentRotation % 180) == 90);
+            int newContainerW = isSwapped ? cardH : cardW;
+            int newContainerH = isSwapped ? cardW : cardH;
+
+            // 保持原中心位置完全不变，防止窗口跳动或漂移
+            int newX = centerX - newContainerW / 2;
+            int newY = centerY - newContainerH / 2;
+            EasyFloat.updateFloat(FLOAT_TAG, newX, newY);
+
+            String orientationDesc = (mCurrentRotation == 0f) ? "0° 竖屏" :
+                                     (mCurrentRotation == 90f) ? "90° 横屏" :
+                                     (mCurrentRotation == 180f) ? "180° 倒转" : "270° 反向横屏";
+            Toast.makeText(activity, "视窗已自适应旋转：" + orientationDesc, Toast.LENGTH_SHORT).show();
         });
 
         // 12. 一键重置回到首句
