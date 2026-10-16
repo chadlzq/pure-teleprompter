@@ -11,6 +11,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
@@ -178,16 +179,8 @@ public class FloatingPrompterManager {
             }
         });
 
-        // 5. 【核心交互 1】：顶部把手独立拖拽移动悬浮窗 (与文字滚动零冲突)
-        View.OnTouchListener windowDragListener = new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                EasyFloat.drag(rootFloatView, event);
-                return true;
-            }
-        };
-        headerDragArea.setOnTouchListener(windowDragListener);
-        dragTouchWrapper.setOnTouchListener(windowDragListener);
+        // 5. 【核心交互 1】：顶部把手原生 WindowManager 极速平滑拖拽
+        setupWindowDragListener(activity, rootFloatView, headerDragArea, dragTouchWrapper);
 
         // 6. 【核心交互 2】：右下角无感拉伸缩放把手 (Corner Resize Handle)
         setupResizeCornerListener(activity, btnScaleCorner);
@@ -223,6 +216,54 @@ public class FloatingPrompterManager {
 
         // 13. 右上角设置
         btnSettings.setOnClickListener(v -> showSettingsDialog(activity));
+    }
+
+    /**
+     * 原生 WindowManager 顶部手柄平滑拖拽，零手势竞争
+     */
+    private void setupWindowDragListener(Activity activity, View rootFloatView, View headerArea, View dragTouchWrapper) {
+        View.OnTouchListener dragListener = new View.OnTouchListener() {
+            private float startTouchX, startTouchY;
+            private int startWindowX, startWindowY;
+            private WindowManager wm;
+            private WindowManager.LayoutParams wmParams;
+            private View windowRoot;
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        startTouchX = event.getRawX();
+                        startTouchY = event.getRawY();
+                        windowRoot = rootFloatView.getRootView();
+                        if (windowRoot != null && windowRoot.getLayoutParams() instanceof WindowManager.LayoutParams) {
+                            wmParams = (WindowManager.LayoutParams) windowRoot.getLayoutParams();
+                            startWindowX = wmParams.x;
+                            startWindowY = wmParams.y;
+                            wm = (WindowManager) activity.getSystemService(Context.WINDOW_SERVICE);
+                        }
+                        return true;
+
+                    case MotionEvent.ACTION_MOVE:
+                        if (wm != null && wmParams != null && windowRoot != null) {
+                            float dx = event.getRawX() - startTouchX;
+                            float dy = event.getRawY() - startTouchY;
+                            wmParams.x = (int) (startWindowX + dx);
+                            wmParams.y = (int) (startWindowY + dy);
+                            wm.updateViewLayout(windowRoot, wmParams);
+                        }
+                        return true;
+
+                    case MotionEvent.ACTION_UP:
+                    case MotionEvent.ACTION_CANCEL:
+                        return true;
+                }
+                return false;
+            }
+        };
+
+        headerArea.setOnTouchListener(dragListener);
+        dragTouchWrapper.setOnTouchListener(dragListener);
     }
 
     /**
@@ -285,30 +326,43 @@ public class FloatingPrompterManager {
         int touchSlop = ViewConfiguration.get(activity).getScaledTouchSlop();
 
         mFloatBallContainer.setOnTouchListener(new View.OnTouchListener() {
-            private float downX, downY;
+            private float startTouchX, startTouchY;
+            private int startWindowX, startWindowY;
             private boolean isDragged = false;
+            private WindowManager wm;
+            private WindowManager.LayoutParams wmParams;
+            private View windowRoot;
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        downX = event.getRawX();
-                        downY = event.getRawY();
+                        startTouchX = event.getRawX();
+                        startTouchY = event.getRawY();
                         isDragged = false;
-                        EasyFloat.drag(rootFloatView, event);
+                        windowRoot = rootFloatView.getRootView();
+                        if (windowRoot != null && windowRoot.getLayoutParams() instanceof WindowManager.LayoutParams) {
+                            wmParams = (WindowManager.LayoutParams) windowRoot.getLayoutParams();
+                            startWindowX = wmParams.x;
+                            startWindowY = wmParams.y;
+                            wm = (WindowManager) activity.getSystemService(Context.WINDOW_SERVICE);
+                        }
                         return true;
 
                     case MotionEvent.ACTION_MOVE:
-                        float dx = Math.abs(event.getRawX() - downX);
-                        float dy = Math.abs(event.getRawY() - downY);
-                        if (dx > touchSlop || dy > touchSlop) {
+                        float dx = event.getRawX() - startTouchX;
+                        float dy = event.getRawY() - startTouchY;
+                        if (Math.abs(dx) > touchSlop || Math.abs(dy) > touchSlop) {
                             isDragged = true;
                         }
-                        EasyFloat.drag(rootFloatView, event);
+                        if (isDragged && wm != null && wmParams != null && windowRoot != null) {
+                            wmParams.x = (int) (startWindowX + dx);
+                            wmParams.y = (int) (startWindowY + dy);
+                            wm.updateViewLayout(windowRoot, wmParams);
+                        }
                         return true;
 
                     case MotionEvent.ACTION_UP:
-                        EasyFloat.drag(rootFloatView, event);
                         if (!isDragged) {
                             // 轻触点击：展开为提词大视窗
                             expandFromFloatBall();
@@ -316,7 +370,6 @@ public class FloatingPrompterManager {
                         return true;
 
                     case MotionEvent.ACTION_CANCEL:
-                        EasyFloat.drag(rootFloatView, event);
                         return true;
                 }
                 return false;
