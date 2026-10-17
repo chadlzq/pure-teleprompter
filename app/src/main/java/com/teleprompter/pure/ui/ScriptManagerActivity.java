@@ -74,7 +74,7 @@ public class ScriptManagerActivity extends AppCompatActivity implements ScriptDr
 
         initViews();
         setupListeners();
-        checkAndInitDefaultTutorial();
+        checkPrivacyAndInit();
     }
 
     @Override
@@ -116,6 +116,44 @@ public class ScriptManagerActivity extends AppCompatActivity implements ScriptDr
         });
     }
 
+    private static final String PREF_PRIVACY = "privacy_policy_prefs";
+    private static final String KEY_PRIVACY_AGREED = "has_agreed_privacy";
+
+    /**
+     * 国内应用商店上架合规审核强制项：首次启动隐私合规提示与授权弹窗
+     */
+    private void checkPrivacyAndInit() {
+        android.content.SharedPreferences sp = getSharedPreferences(PREF_PRIVACY, MODE_PRIVATE);
+        boolean agreed = sp.getBoolean(KEY_PRIVACY_AGREED, false);
+        if (!agreed) {
+            showFirstLaunchPrivacyDialog();
+        } else {
+            checkAndInitDefaultTutorial();
+        }
+    }
+
+    private void showFirstLaunchPrivacyDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("用户协议与隐私保护提示")
+                .setMessage("欢迎使用极简提词器！在您开始使用前，请仔细阅读我们的隐私合规声明：\n\n" +
+                        "1.【100% 纯本地离线承诺】：本应用未申请任何 INTERNET 网络访问权限，不具备任何联网通信能力，从底层物理杜绝数据泄露可能；\n\n" +
+                        "2.【零个人信息收集】：不读取通讯录、位置、设备识别码（IMEI/OAID/Android ID等），您的所有台词文稿仅保存在手机本地私有数据库；\n\n" +
+                        "3.【必要权限说明】：在拍摄录制时，需要使用系统悬浮窗权限以便在相机上层显示提词窗口。\n\n" +
+                        "点击“同意并继续”即代表您已阅读并认可上述声明。")
+                .setCancelable(false)
+                .setPositiveButton("同意并继续", (dialog, which) -> {
+                    getSharedPreferences(PREF_PRIVACY, MODE_PRIVATE)
+                            .edit()
+                            .putBoolean(KEY_PRIVACY_AGREED, true)
+                            .apply();
+                    checkAndInitDefaultTutorial();
+                })
+                .setNegativeButton("不同意并退出", (dialog, which) -> {
+                    finish();
+                })
+                .show();
+    }
+
     /**
      * 首次安装预置新手教学文档
      */
@@ -130,7 +168,7 @@ public class ScriptManagerActivity extends AppCompatActivity implements ScriptDr
                         + "1. 点击卡片右侧绿色的「悬浮开播」，即可在任意短视频、相机应用上方悬浮提词；\n"
                         + "2. 拖动悬浮窗顶部中央手柄，可随心移动位置（推荐放在前置摄像头正下方，眼神更聚焦自然）；\n"
                         + "3. 拖动悬浮窗右下角角标可自由缩放视窗大小；点击「-」可收起为小圆球，随时轻触唤回；\n"
-                        + "4. 悬浮窗与全屏板均支持一键「🔄 旋转」，无论横屏还是竖屏录制都能完美顺应视线；\n"
+                        + "4. 悬浮窗与全屏板均支持一键「🔄 旋转视窗」与「🪞 左右镜像」，无论横屏还是分光镜拍摄都能完美应对；\n"
                         + "5. 点击主页右上角「⚙ 设置」，可自由调节字号大小、字体颜色、背景透明度与分光镜镜像翻转；\n"
                         + "6. 点击上方「新建台词」或「导入 TXT」，即可将你的口播稿件随时保存与演练！\n\n"
                         + "祝你镜头感满满，口播一次过！";

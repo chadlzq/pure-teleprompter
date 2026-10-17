@@ -62,6 +62,8 @@ public class FloatingPrompterManager {
     private int mCurrentBgColor = 0xFF12141A;
     private int mCurrentOpacity = 75;
     private float mCurrentRotation = 0f;
+    private int mBaseWidth = 0;
+    private int mBaseHeight = 0;
 
     private FloatingPrompterManager() {}
 
@@ -136,6 +138,7 @@ public class FloatingPrompterManager {
         ImageView btnClose = rootFloatView.findViewById(R.id.btn_close);
         ImageView btnMinimize = rootFloatView.findViewById(R.id.btn_minimize);
         ImageView btnRotate = rootFloatView.findViewById(R.id.btn_rotate);
+        ImageView btnMirror = rootFloatView.findViewById(R.id.btn_mirror);
         ImageView btnReset = rootFloatView.findViewById(R.id.btn_reset);
         ImageView btnScaleCorner = rootFloatView.findViewById(R.id.btn_scale_corner);
 
@@ -218,8 +221,9 @@ public class FloatingPrompterManager {
         // 10. 播放/暂停
         mBtnPlayPause.setOnClickListener(v -> mScrollView.togglePlayPause());
 
-        // 11. 自适应旋转悬浮视窗 (0° -> 90° -> 180° -> 270° -> 0°)
-        // 彻底解决按键被裁切、需要手动重新调整大小与位置的问题
+        // 11. 自适应旋转悬浮视窗 (0° 标准竖屏 -> 90° 顺时针横屏 -> 270° 逆时针横屏 -> 0°)
+        // 同时更新 WindowManager.LayoutParams 宽高，彻底消除裁切、错位与按键丢失
+        btnRotate.setColorFilter(mCurrentRotation != 0f ? 0xFF38EF7D : Color.WHITE);
         btnRotate.setOnClickListener(v -> {
             FloatingWindowHelper helper = FloatingWindowManager.INSTANCE.getHelper(FLOAT_TAG);
             int currentX = 0, currentY = 0;
@@ -228,40 +232,64 @@ public class FloatingPrompterManager {
                 currentY = helper.getParams().y;
             }
 
-            int currentContainerW = mRotatableContainer != null ? mRotatableContainer.getWidth() : mPrompterCard.getWidth();
-            int currentContainerH = mRotatableContainer != null ? mRotatableContainer.getHeight() : mPrompterCard.getHeight();
-            int centerX = currentX + currentContainerW / 2;
-            int centerY = currentY + currentContainerH / 2;
+            int cardW = mBaseWidth > 0 ? mBaseWidth : mPrompterCard.getWidth();
+            int cardH = mBaseHeight > 0 ? mBaseHeight : mPrompterCard.getHeight();
 
-            mCurrentRotation = (mCurrentRotation + 90f) % 360f;
+            boolean wasSwapped = (Math.abs(((int) mCurrentRotation) % 180) == 90);
+            int curContainerW = wasSwapped ? cardH : cardW;
+            int curContainerH = wasSwapped ? cardW : cardH;
+            int centerX = currentX + curContainerW / 2;
+            int centerY = currentY + curContainerH / 2;
+
+            // 循环切换：0° -> 90° -> 270° -> 0°（剔除无实用价值的180°倒立）
+            if (mCurrentRotation == 0f) {
+                mCurrentRotation = 90f;
+            } else if (mCurrentRotation == 90f) {
+                mCurrentRotation = 270f;
+            } else {
+                mCurrentRotation = 0f;
+            }
+
             if (mRotatableContainer != null) {
                 mRotatableContainer.setChildRotation(mCurrentRotation);
             } else {
                 mPrompterCard.setRotation(mCurrentRotation);
             }
 
-            // 计算旋转后新的测量尺寸
-            int cardW = mPrompterCard.getWidth();
-            int cardH = mPrompterCard.getHeight();
-            boolean isSwapped = (Math.abs(mCurrentRotation % 180) == 90);
+            boolean isSwapped = (Math.abs(((int) mCurrentRotation) % 180) == 90);
             int newContainerW = isSwapped ? cardH : cardW;
             int newContainerH = isSwapped ? cardW : cardH;
 
-            // 保持原中心位置完全不变，防止窗口跳动或漂移
+            // 保持原中心位置完全不变
             int newX = centerX - newContainerW / 2;
             int newY = centerY - newContainerH / 2;
-            EasyFloat.updateFloat(FLOAT_TAG, newX, newY);
 
-            String orientationDesc = (mCurrentRotation == 0f) ? "0° 竖屏" :
-                                     (mCurrentRotation == 90f) ? "90° 横屏" :
-                                     (mCurrentRotation == 180f) ? "180° 倒转" : "270° 反向横屏";
-            Toast.makeText(activity, "视窗已自适应旋转：" + orientationDesc, Toast.LENGTH_SHORT).show();
+            // 关键：同时传递宽高给 WindowManager，让视窗物理边界实时扩展，杜绝任何裁切
+            EasyFloat.updateFloat(FLOAT_TAG, newX, newY, newContainerW, newContainerH);
+
+            btnRotate.setColorFilter(mCurrentRotation != 0f ? 0xFF38EF7D : Color.WHITE);
+
+            String orientationDesc = (mCurrentRotation == 0f) ? "标准竖屏 (0°)" :
+                                     (mCurrentRotation == 90f) ? "顺时针横屏 (90°)" : "逆时针横屏 (270°)";
+            Toast.makeText(activity, "视窗已旋转至：" + orientationDesc, Toast.LENGTH_SHORT).show();
         });
 
-        // 12. 一键重置回到首句
+        // 12. 左右镜像翻转按键 (纯图标 🪞，分光镜与自拍镜像核心功能)
+        if (btnMirror != null) {
+            btnMirror.setColorFilter(mScrollView.isMirror() ? 0xFF38EF7D : Color.WHITE);
+            btnMirror.setOnClickListener(v -> {
+                mScrollView.toggleMirror();
+                boolean isMirror = mScrollView.isMirror();
+                PrompterPreferences.setMirror(activity, isMirror);
+                btnMirror.setColorFilter(isMirror ? 0xFF38EF7D : Color.WHITE);
+                Toast.makeText(activity, isMirror ? "已开启左右镜像翻转 (分光镜模式)" : "已恢复正常显示", Toast.LENGTH_SHORT).show();
+            });
+        }
+
+        // 13. 一键重置回到首句
         btnReset.setOnClickListener(v -> mScrollView.resetToStart(true));
 
-        // 13. 纯图标对齐切换
+        // 14. 纯图标对齐切换
         tabLeft.setOnClickListener(v -> {
             mScrollView.setTextAlignmentMode(SmoothTextScrollView.ALIGN_LEFT);
             updateAlignmentIconUI(tabLeft, tabCenter, tabRight, SmoothTextScrollView.ALIGN_LEFT);
@@ -361,6 +389,9 @@ public class FloatingPrompterManager {
                         targetW = Math.max(minWidth, Math.min(maxWidth, targetW));
                         targetH = Math.max(minHeight, Math.min(maxHeight, targetH));
 
+                        mBaseWidth = targetW;
+                        mBaseHeight = targetH;
+
                         ViewGroup.LayoutParams lp = mPrompterCard.getLayoutParams();
                         lp.width = targetW;
                         lp.height = targetH;
@@ -449,6 +480,8 @@ public class FloatingPrompterManager {
         SharedPreferences sp = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         int savedW = sp.getInt(KEY_WIDTH, dp2px(context, 320));
         int savedH = sp.getInt(KEY_HEIGHT, dp2px(context, 240));
+        mBaseWidth = savedW;
+        mBaseHeight = savedH;
 
         ViewGroup.LayoutParams lp = mPrompterCard.getLayoutParams();
         lp.width = savedW;
@@ -496,6 +529,7 @@ public class FloatingPrompterManager {
         mCurrentRotation = 0f;
         EasyFloat.dismiss(FLOAT_TAG);
         mRootFloatView = null;
+        mRotatableContainer = null;
         mPrompterCard = null;
         mFloatBallContainer = null;
         mScrollView = null;

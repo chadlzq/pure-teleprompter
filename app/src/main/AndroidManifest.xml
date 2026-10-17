@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- 悬浮窗显示权限 (核心权限) -->
+    <!-- 悬浮窗显示权限 (核心唯一权限) -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <!-- 100% 纯本地运行，不申请任何联网权限、设备识别码、位置等高危权限，100% 免除工信部隐私合规审查风险 -->
 

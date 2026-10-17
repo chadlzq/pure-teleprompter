@@ -223,7 +223,7 @@ public class SettingsActivity extends AppCompatActivity {
                         "2. 本地私有存储：您创建、编辑、导入的所有台词文稿，仅加密保存在手机本地 Room SQLite 数据库中，卸载应用即同步销毁，绝无云端备份。\n\n" +
                         "3. 零数据采集：不获取手机设备号 (IMEI/OAID/Android ID)、不读取位置与通讯录、不嵌入任何第三方广告或统计分析 SDK。\n\n" +
                         "4. 必要权限说明：仅需系统悬浮窗权限（用于在录像或直播软件上层浮窗显示提示词），以及导入标准 TXT 文本时的系统文件访问权限。\n\n" +
-                        "符合国内应用商店（酷安、华为、小米、OPPO、vivo 等）及 Google Play 上架合规要求。")
+                        "符合国内应用商店（酷安、华为、小米、OPPO、vivo 等）上架合规要求。")
                 .setPositiveButton("我已了解", null)
                 .show();
     }

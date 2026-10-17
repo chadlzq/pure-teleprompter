@@ -171,12 +171,24 @@
                 android:id="@+id/btn_rotate"
                 android:layout_width="30dp"
                 android:layout_height="28dp"
-                android:layout_marginEnd="6dp"
+                android:layout_marginEnd="5dp"
                 android:background="@drawable/bg_segmented_capsule"
                 android:padding="6dp"
                 android:src="@drawable/ic_rotate"
                 app:tint="#FFFFFF"
                 android:contentDescription="旋转提示词视窗" />
+
+            <!-- 左右镜像翻转按键 (纯图标 🪞，分光镜与自拍镜像必备) -->
+            <ImageView
+                android:id="@+id/btn_mirror"
+                android:layout_width="30dp"
+                android:layout_height="28dp"
+                android:layout_marginEnd="5dp"
+                android:background="@drawable/bg_segmented_capsule"
+                android:padding="6dp"
+                android:src="@drawable/ic_mirror"
+                app:tint="#FFFFFF"
+                android:contentDescription="左右镜像翻转" />
 
             <!-- 一键重置首句按键 (纯图标 ↺) -->
             <ImageView

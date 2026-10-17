@@ -191,4 +191,12 @@ public class PromptBoardActivity extends AppCompatActivity {
             });
         }
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mScrollView != null) {
+            mScrollView.pauseScroll();
+        }
+    }
 }

@@ -78,40 +78,26 @@ public class ScriptDraftAdapter extends RecyclerView.Adapter<ScriptDraftAdapter.
             holder.tvPreview.setVisibility(View.VISIBLE);
         }
 
-        // 3. 字数与估算时长
-        int chars = script.wordCount > 0 ? script.wordCount : (script.content != null ? script.content.length() : 0);
-        int estSec = (int) Math.ceil(chars / 4.0);
-        String durationText;
-        if (estSec < 60) {
-            durationText = "⏱ 约 " + Math.max(1, estSec) + " 秒";
-        } else {
-            int mins = estSec / 60;
-            int remSec = estSec % 60;
-            durationText = "⏱ 约 " + mins + " 分" + (remSec > 0 ? " " + remSec + " 秒" : "");
-        }
-        holder.tvDurationTag.setText(durationText);
-        holder.tvWordsTag.setText(chars + " 字");
-
-        // 4. 更新日期
+        // 3. 更新日期
         long time = script.updateTime > 0 ? script.updateTime : System.currentTimeMillis();
         holder.tvDate.setText(mDateFormat.format(new Date(time)));
 
-        // 5. 点击卡片主体 -> 编辑台词
+        // 4. 点击卡片主体 -> 编辑台词
         holder.itemView.setOnClickListener(v -> {
             if (mListener != null) mListener.onEdit(script);
         });
 
-        // 6. 点击悬浮开播 -> 呼出悬浮窗
+        // 5. 点击悬浮开播 -> 呼出悬浮窗
         holder.btnFloat.setOnClickListener(v -> {
             if (mListener != null) mListener.onLaunchFloat(script);
         });
 
-        // 7. 点击全屏开播 -> 进入全屏提词板
+        // 6. 点击全屏开播 -> 进入全屏提词板
         holder.btnBoard.setOnClickListener(v -> {
             if (mListener != null) mListener.onLaunchBoard(script);
         });
 
-        // 8. 点击删除 -> 确认后删除
+        // 7. 点击删除 -> 确认后删除
         holder.btnDelete.setOnClickListener(v -> {
             if (mListener != null) mListener.onDelete(script);
         });
@@ -125,8 +111,6 @@ public class ScriptDraftAdapter extends RecyclerView.Adapter<ScriptDraftAdapter.
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvTitle;
         TextView tvPreview;
-        TextView tvDurationTag;
-        TextView tvWordsTag;
         TextView tvDate;
         View btnFloat;
         ImageView btnBoard;
@@ -136,8 +120,6 @@ public class ScriptDraftAdapter extends RecyclerView.Adapter<ScriptDraftAdapter.
             super(itemView);
             tvTitle = itemView.findViewById(R.id.tv_title);
             tvPreview = itemView.findViewById(R.id.tv_preview);
-            tvDurationTag = itemView.findViewById(R.id.tv_duration_tag);
-            tvWordsTag = itemView.findViewById(R.id.tv_words_tag);
             tvDate = itemView.findViewById(R.id.tv_date);
             btnFloat = itemView.findViewById(R.id.btn_float);
             btnBoard = itemView.findViewById(R.id.btn_board);
