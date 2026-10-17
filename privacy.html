@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>极简提词器 - 隐私政策与安全规范</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.7;
+            color: #2c3e50;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 24px 16px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 32px 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        h1 {
+            font-size: 24px;
+            border-bottom: 2px solid #38ef7d;
+            padding-bottom: 12px;
+            color: #111827;
+        }
+        h2 {
+            font-size: 18px;
+            margin-top: 24px;
+            color: #1f2937;
+        }
+        p, li {
+            font-size: 15px;
+            color: #4b5563;
+        }
+        .highlight {
+            background-color: #ecfdf5;
+            border-left: 4px solid #10b981;
+            padding: 12px 16px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .footer {
+            margin-top: 40px;
+            padding-top: 16px;
+            border-top: 1px solid #e5e7eb;
+            font-size: 13px;
+            color: #9ca3af;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>极简提词器 (Pure Teleprompter) 隐私政策</h1>
+        <p>更新日期：2026年10月17日 | 生效日期：2026年10月17日</p>
+
+        <div class="highlight">
+            <strong>核心承诺：100% 纯本地离线运行，绝不联网，绝不上报个人数据。</strong>
+        </div>
+
+        <h2>一、我们如何收集和使用您的个人信息</h2>
+        <p>极简提词器作为一款专注高效的单机离线工具软件，<strong>本应用未申请任何互联网访问权限（INTERNET 权限已剔除）</strong>。从系统硬件与底层网络层面上彻底杜绝任何数据外泄的可能：</p>
+        <ul>
+            <li><strong>不采集设备标识符</strong>：不读取 IMEI、OAID、Android ID、MAC 地址或 IMSI；</li>
+            <li><strong>不读取任何敏感权限</strong>：不申请通讯录、相册、麦克风录音、地理位置等无关权限；</li>
+            <li><strong>不嵌入任何第三方 SDK</strong>：无广告投放 SDK、无用户追踪统计 SDK、无消息推送 SDK。</li>
+        </ul>
+
+        <h2>二、应用所需权限的必要性说明</h2>
+        <p>为向您提供必要的提词辅助功能，应用仅会向系统申请以下最基本的权限：</p>
+        <ul>
+            <li><strong>悬浮窗权限 (SYSTEM_ALERT_WINDOW)</strong>：仅用于在您开启其他相机录像或第三方直播应用时，在屏幕顶层悬浮显示提词板与台词滚动窗口；</li>
+            <li><strong>本地存储与文件选择</strong>：仅在您主动点击“导入TXT台词”时，通过系统标准文件选择器读取您选定的文本文件。</li>
+        </ul>
+
+        <h2>三、台词文稿与数据的存储安全</h2>
+        <p>您在应用中创建、编写、修改或导入的全部台词内容，<strong>全部加密保存在您手机本地的私有 SQLite 数据库中</strong>。数据完全受 Android 系统沙盒机制严格保护。当您卸载应用时，所有数据将同步随系统完全清空，绝无任何云端备份。</p>
+
+        <h2>四、未成年人保护</h2>
+        <p>我们非常重视未成年人个人信息的保护。因本应用不收集任何个人身份信息，未成年人可完全放心、安全地使用本工具进行演讲、背诵和朗读练习。</p>
+
+        <h2>五、联系作者与意见反馈</h2>
+        <p>如对本隐私政策有任何疑问或需要协助，您可通过以下电子邮箱随时与开发者取得联系：</p>
+        <p><strong>开发者邮箱</strong>：<a href="mailto:ichad@qq.com">ichad@qq.com</a></p>
+
+        <div class="footer">
+            © 2026 极简提词器 Pure Teleprompter. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>
