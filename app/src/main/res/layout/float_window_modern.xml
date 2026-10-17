@@ -8,7 +8,7 @@
     4. 【纯净居中视线标线】：正居中无文字干扰黄金参考线
     5. 【纯图标去文字操作】：左/中/右对齐、重置、播放全部使用扁平高对比度图标
 -->
-<com.teleprompter.pure.ui.RotatableFloatContainer 
+<FrameLayout 
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/float_root"
@@ -178,18 +178,6 @@
                 android:layout_height="1dp"
                 android:layout_weight="1" />
 
-            <!-- 旋转提示词视窗按键 (纯图标 🔄) -->
-            <ImageView
-                android:id="@+id/btn_rotate"
-                android:layout_width="30dp"
-                android:layout_height="28dp"
-                android:layout_marginEnd="5dp"
-                android:background="@drawable/bg_segmented_capsule"
-                android:padding="6dp"
-                android:src="@drawable/ic_rotate"
-                app:tint="#FFFFFF"
-                android:contentDescription="旋转提示词视窗" />
-
             <!-- 左右镜像翻转按键 (纯图标 🪞，分光镜与自拍镜像必备) -->
             <ImageView
                 android:id="@+id/btn_mirror"
@@ -258,4 +246,4 @@
             android:contentDescription="展开悬浮提词器" />
     </LinearLayout>
 
-</com.teleprompter.pure.ui.RotatableFloatContainer>
+</FrameLayout>
