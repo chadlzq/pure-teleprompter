@@ -62,6 +62,18 @@
                     android:background="@drawable/bg_drag_handle_pill" />
             </LinearLayout>
 
+            <!-- 一键复位窗口尺寸与位置按钮 (防变形防迷失) -->
+            <ImageView
+                android:id="@+id/btn_reset_window"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_marginEnd="4dp"
+                android:padding="6dp"
+                android:src="@drawable/ic_reset"
+                app:tint="#80FFFFFF"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="复位默认大小与居中" />
+
             <!-- 最小化为悬浮球按钮 -->
             <ImageView
                 android:id="@+id/btn_minimize"
@@ -110,7 +122,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- 底部控制栏：纯图标胶囊与拉伸角标 -->
+        <!-- 底部控制栏：纯图标胶囊组 (宽度自适应，绝不挤压右侧拉伸角标) -->
         <LinearLayout
             android:id="@+id/bottom_control_bar"
             android:layout_width="0dp"
@@ -119,7 +131,7 @@
             android:orientation="horizontal"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            app:layout_constraintEnd_toStartOf="@id/btn_scale_corner">
 
             <!-- 纯图标三段式对齐胶囊 (左对齐 | 居中 | 右对齐) -->
             <LinearLayout
@@ -213,17 +225,20 @@
                 android:tint="#000000"
                 app:tint="#000000"
                 android:contentDescription="播放与暂停" />
-
-            <!-- 右下角缩放拉伸角标 (Corner Resize Grip) -->
-            <ImageView
-                android:id="@+id/btn_scale_corner"
-                android:layout_width="26dp"
-                android:layout_height="26dp"
-                android:layout_marginStart="4dp"
-                android:padding="4dp"
-                android:src="@drawable/ic_scale_corner"
-                android:contentDescription="拖拽拉伸窗口尺寸" />
         </LinearLayout>
+
+        <!-- 右下角缩放拉伸角标 (Corner Resize Grip，直接固定在卡片右下角，大触控区，绝不隐藏) -->
+        <ImageView
+            android:id="@+id/btn_scale_corner"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:padding="6dp"
+            android:src="@drawable/ic_scale_corner"
+            app:tint="#B3FFFFFF"
+            android:contentDescription="拖拽拉伸窗口尺寸"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- 2. 收起态：迷你贴边悬浮球 (48dp 晶体圆球，默认隐藏) -->

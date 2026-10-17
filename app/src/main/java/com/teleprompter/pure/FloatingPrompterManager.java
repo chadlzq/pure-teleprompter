@@ -2,7 +2,6 @@ package com.teleprompter.pure;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.util.DisplayMetrics;
@@ -36,17 +35,18 @@ import com.teleprompter.pure.ui.SmoothTextScrollView;
  * 
  * 1. 【原生顶级微交互】：居中黄金拍摄视线预置，关闭强磁吸贴边，自由全屏悬停
  * 2. 【无感拖拽手柄】：顶部手柄独立接管窗口平移，台词区纯净滚动不抢手势
- * 3. 【自由拉伸缩放】：右下角支持随时动态拖动调整宽高，自动记忆尺寸
- * 4. 【一键悬浮球收折】：录制准备时一键收缩至 48dp 晶体悬浮球贴边待命，轻触瞬间复原
- * 5. 【系统级设置解耦】：设置移至 APP 内部独立页面，彻底根除 Token 异常与遮挡
- * 6. 【100% 离线纯净】：零联网权限，保护隐私安全
+ * 3. 【自由拉伸缩放】：右下角支持随时动态拖动调整宽高，角标固定防裁切隐藏
+ * 4. 【一键复位居中】：头部预置一键复位按钮，防止窗口失真或迷失
+ * 5. 【清爽默认状态】：启动悬浮窗始终保持纯净默认尺寸与位置，绝不持久化异常尺寸
+ * 6. 【无损左右旋转】：支持 0° 竖屏 -> 90° 顺时针横屏 -> 270° 逆时针横屏无损旋转，按键零裁切
+ * 7. 【一键悬浮球收折】：录制准备时一键收缩至 48dp 晶体悬浮球贴边待命，轻触瞬间复原
+ * 8. 【100% 离线纯净】：零联网权限，保护隐私安全
  */
 public class FloatingPrompterManager {
 
     private static final String FLOAT_TAG = "PURE_TELEPROMPTER_FLOAT";
-    private static final String PREF_NAME = "prompter_window_prefs";
-    private static final String KEY_WIDTH = "prompter_width";
-    private static final String KEY_HEIGHT = "prompter_height";
+    private static final int DEFAULT_WIDTH_DP = 320;
+    private static final int DEFAULT_HEIGHT_DP = 240;
 
     private static volatile FloatingPrompterManager sInstance;
 
@@ -102,6 +102,8 @@ public class FloatingPrompterManager {
             EasyFloat.dismiss(FLOAT_TAG);
         }
 
+        mCurrentRotation = 0f;
+
         DisplayMetrics dm = activity.getResources().getDisplayMetrics();
         // 初始位置：水平居中，距离屏幕顶部 15% (紧靠前置摄像头下方黄金跟视点)
         int initialY = (int) (dm.heightPixels * 0.15f);
@@ -124,9 +126,8 @@ public class FloatingPrompterManager {
     }
 
     private void bindViewEvents(Activity activity, View rootFloatView) {
-        if (rootFloatView instanceof RotatableFloatContainer) {
-            mRotatableContainer = (RotatableFloatContainer) rootFloatView;
-        }
+        mRotatableContainer = rootFloatView instanceof RotatableFloatContainer
+                ? (RotatableFloatContainer) rootFloatView : null;
         mPrompterCard = rootFloatView.findViewById(R.id.prompter_card_container);
         mFloatBallContainer = rootFloatView.findViewById(R.id.float_ball_container);
         mScrollView = rootFloatView.findViewById(R.id.text_scroll_view);
@@ -136,6 +137,7 @@ public class FloatingPrompterManager {
         View headerDragArea = rootFloatView.findViewById(R.id.header_drag_area);
         View dragTouchWrapper = rootFloatView.findViewById(R.id.drag_handle_touch_wrapper);
         ImageView btnClose = rootFloatView.findViewById(R.id.btn_close);
+        ImageView btnResetWindow = rootFloatView.findViewById(R.id.btn_reset_window);
         ImageView btnMinimize = rootFloatView.findViewById(R.id.btn_minimize);
         ImageView btnRotate = rootFloatView.findViewById(R.id.btn_rotate);
         ImageView btnMirror = rootFloatView.findViewById(R.id.btn_mirror);
@@ -149,8 +151,8 @@ public class FloatingPrompterManager {
         // 确保播放/暂停按钮图标为醒目纯黑，绝不空白
         mBtnPlayPause.setColorFilter(Color.BLACK);
 
-        // 1. 恢复用户保存的窗口尺寸或默认尺寸
-        restoreSavedWindowDimensions(activity);
+        // 1. 严格使用纯净默认尺寸，绝不持久化异常尺寸与位置
+        resetWindowDimensionsToDefault(activity);
 
         // 2. 从全局配置 PrompterPreferences 读取偏好设定
         int prefSpeed = PrompterPreferences.getScrollSpeed(activity);
@@ -209,20 +211,25 @@ public class FloatingPrompterManager {
         // 6. 顶部把手原生 WindowManager / EasyFloat 平滑极速拖拽
         setupWindowDragListener(headerDragArea, dragTouchWrapper);
 
-        // 7. 右下角无感拉伸缩放把手 (Corner Resize Handle)
+        // 7. 顶部一键复位默认尺寸与位置
+        if (btnResetWindow != null) {
+            btnResetWindow.setOnClickListener(v -> resetWindowToDefaults(activity));
+        }
+
+        // 8. 右下角无感拉伸缩放把手 (Corner Resize Handle)
         setupResizeCornerListener(activity, btnScaleCorner);
 
-        // 8. 一键最小化折叠成 48dp 悬浮球
+        // 9. 一键最小化折叠成 48dp 悬浮球
         btnMinimize.setOnClickListener(v -> minimizeToFloatBall());
 
-        // 9. 悬浮球拖拽移动与轻触展开
+        // 10. 悬浮球拖拽移动与轻触展开
         setupFloatBallTouchListener(activity);
 
-        // 10. 播放/暂停
+        // 11. 播放/暂停
         mBtnPlayPause.setOnClickListener(v -> mScrollView.togglePlayPause());
 
-        // 11. 自适应旋转悬浮视窗 (0° 标准竖屏 -> 90° 顺时针横屏 -> 270° 逆时针横屏 -> 0°)
-        // 同时更新 WindowManager.LayoutParams 宽高，彻底消除裁切、错位与按键丢失
+        // 12. 自适应左右旋转悬浮视窗 (0° 标准竖屏 -> 90° 顺时针横屏 -> 270° 逆时针横屏 -> 0°)
+        // 同时更新 WindowManager 宽高与几何位移补偿，彻底消除裁切、错位与按键丢失
         btnRotate.setColorFilter(mCurrentRotation != 0f ? 0xFF38EF7D : Color.WHITE);
         btnRotate.setOnClickListener(v -> {
             FloatingWindowHelper helper = FloatingWindowManager.INSTANCE.getHelper(FLOAT_TAG);
@@ -232,16 +239,16 @@ public class FloatingPrompterManager {
                 currentY = helper.getParams().y;
             }
 
-            int cardW = mBaseWidth > 0 ? mBaseWidth : mPrompterCard.getWidth();
-            int cardH = mBaseHeight > 0 ? mBaseHeight : mPrompterCard.getHeight();
+            int baseW = mBaseWidth > 0 ? mBaseWidth : dp2px(activity, DEFAULT_WIDTH_DP);
+            int baseH = mBaseHeight > 0 ? mBaseHeight : dp2px(activity, DEFAULT_HEIGHT_DP);
 
             boolean wasSwapped = (Math.abs(((int) mCurrentRotation) % 180) == 90);
-            int curContainerW = wasSwapped ? cardH : cardW;
-            int curContainerH = wasSwapped ? cardW : cardH;
+            int curContainerW = wasSwapped ? baseH : baseW;
+            int curContainerH = wasSwapped ? baseW : baseH;
             int centerX = currentX + curContainerW / 2;
             int centerY = currentY + curContainerH / 2;
 
-            // 循环切换：0° -> 90° -> 270° -> 0°（剔除无实用价值的180°倒立）
+            // 循环切换：0° -> 90° (顺时针横屏) -> 270° (逆时针横屏) -> 0°
             if (mCurrentRotation == 0f) {
                 mCurrentRotation = 90f;
             } else if (mCurrentRotation == 90f) {
@@ -252,19 +259,19 @@ public class FloatingPrompterManager {
 
             if (mRotatableContainer != null) {
                 mRotatableContainer.setChildRotation(mCurrentRotation);
-            } else {
+            } else if (mPrompterCard != null) {
                 mPrompterCard.setRotation(mCurrentRotation);
             }
 
             boolean isSwapped = (Math.abs(((int) mCurrentRotation) % 180) == 90);
-            int newContainerW = isSwapped ? cardH : cardW;
-            int newContainerH = isSwapped ? cardW : cardH;
+            int newContainerW = isSwapped ? baseH : baseW;
+            int newContainerH = isSwapped ? baseW : baseH;
 
-            // 保持原中心位置完全不变
+            // 保持原几何中心位置完全不变
             int newX = centerX - newContainerW / 2;
             int newY = centerY - newContainerH / 2;
 
-            // 关键：同时传递宽高给 WindowManager，让视窗物理边界实时扩展，杜绝任何裁切
+            // 同步传递宽高给 WindowManager，让视窗物理边界实时扩展，杜绝任何裁切
             EasyFloat.updateFloat(FLOAT_TAG, newX, newY, newContainerW, newContainerH);
 
             btnRotate.setColorFilter(mCurrentRotation != 0f ? 0xFF38EF7D : Color.WHITE);
@@ -274,7 +281,7 @@ public class FloatingPrompterManager {
             Toast.makeText(activity, "视窗已旋转至：" + orientationDesc, Toast.LENGTH_SHORT).show();
         });
 
-        // 12. 左右镜像翻转按键 (纯图标 🪞，分光镜与自拍镜像核心功能)
+        // 13. 左右镜像翻转按键 (纯图标 🪞，分光镜与自拍镜像核心功能)
         if (btnMirror != null) {
             btnMirror.setColorFilter(mScrollView.isMirror() ? 0xFF38EF7D : Color.WHITE);
             btnMirror.setOnClickListener(v -> {
@@ -286,10 +293,10 @@ public class FloatingPrompterManager {
             });
         }
 
-        // 13. 一键重置回到首句
+        // 14. 一键重置回到首句
         btnReset.setOnClickListener(v -> mScrollView.resetToStart(true));
 
-        // 14. 纯图标对齐切换
+        // 15. 纯图标对齐切换
         tabLeft.setOnClickListener(v -> {
             mScrollView.setTextAlignmentMode(SmoothTextScrollView.ALIGN_LEFT);
             updateAlignmentIconUI(tabLeft, tabCenter, tabRight, SmoothTextScrollView.ALIGN_LEFT);
@@ -303,7 +310,7 @@ public class FloatingPrompterManager {
             updateAlignmentIconUI(tabLeft, tabCenter, tabRight, SmoothTextScrollView.ALIGN_RIGHT);
         });
 
-        // 14. 左上角退出
+        // 16. 左上角退出
         btnClose.setOnClickListener(v -> dismiss());
     }
 
@@ -354,14 +361,15 @@ public class FloatingPrompterManager {
     }
 
     /**
-     * 右下角窗口拉伸逻辑
+     * 右下角窗口拉伸逻辑：实时通知 WindowManager 容器大小，绝不隐藏缩放角标
      */
     private void setupResizeCornerListener(Activity activity, View scaleCorner) {
+        if (scaleCorner == null) return;
         DisplayMetrics dm = activity.getResources().getDisplayMetrics();
         int screenWidth = dm.widthPixels;
         int screenHeight = dm.heightPixels;
-        int minWidth = dp2px(activity, 220);
-        int minHeight = dp2px(activity, 160);
+        int minWidth = dp2px(activity, 280);
+        int minHeight = dp2px(activity, 200);
         int maxWidth = screenWidth - dp2px(activity, 16);
         int maxHeight = screenHeight - dp2px(activity, 60);
 
@@ -375,8 +383,8 @@ public class FloatingPrompterManager {
                     case MotionEvent.ACTION_DOWN:
                         startX = event.getRawX();
                         startY = event.getRawY();
-                        initialW = mPrompterCard.getWidth();
-                        initialH = mPrompterCard.getHeight();
+                        initialW = mBaseWidth > 0 ? mBaseWidth : mPrompterCard.getWidth();
+                        initialH = mBaseHeight > 0 ? mBaseHeight : mPrompterCard.getHeight();
                         return true;
 
                     case MotionEvent.ACTION_MOVE:
@@ -396,11 +404,16 @@ public class FloatingPrompterManager {
                         lp.width = targetW;
                         lp.height = targetH;
                         mPrompterCard.setLayoutParams(lp);
+
+                        boolean isSwapped = (Math.abs(((int) mCurrentRotation) % 180) == 90);
+                        int winW = isSwapped ? targetH : targetW;
+                        int winH = isSwapped ? targetW : targetH;
+                        EasyFloat.updateFloat(FLOAT_TAG, -1, -1, winW, winH);
                         return true;
 
                     case MotionEvent.ACTION_UP:
                     case MotionEvent.ACTION_CANCEL:
-                        saveWindowDimensions(activity, mPrompterCard.getWidth(), mPrompterCard.getHeight());
+                        // 零持久化：每次重新打开应用均呈现清爽默认态
                         return true;
                 }
                 return false;
@@ -466,6 +479,8 @@ public class FloatingPrompterManager {
         if (mPrompterCard != null && mFloatBallContainer != null) {
             mPrompterCard.setVisibility(View.GONE);
             mFloatBallContainer.setVisibility(View.VISIBLE);
+            int ballSize = dp2px(mFloatBallContainer.getContext(), 48);
+            EasyFloat.updateFloat(FLOAT_TAG, -1, -1, ballSize, ballSize);
         }
     }
 
@@ -473,25 +488,55 @@ public class FloatingPrompterManager {
         if (mPrompterCard != null && mFloatBallContainer != null) {
             mFloatBallContainer.setVisibility(View.GONE);
             mPrompterCard.setVisibility(View.VISIBLE);
+            boolean isSwapped = (Math.abs(((int) mCurrentRotation) % 180) == 90);
+            int winW = isSwapped ? mBaseHeight : mBaseWidth;
+            int winH = isSwapped ? mBaseWidth : mBaseHeight;
+            EasyFloat.updateFloat(FLOAT_TAG, -1, -1, winW, winH);
         }
     }
 
-    private void restoreSavedWindowDimensions(Context context) {
-        SharedPreferences sp = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        int savedW = sp.getInt(KEY_WIDTH, dp2px(context, 320));
-        int savedH = sp.getInt(KEY_HEIGHT, dp2px(context, 240));
-        mBaseWidth = savedW;
-        mBaseHeight = savedH;
+    /**
+     * 重置悬浮窗宽高尺寸为初始默认 320dp x 240dp
+     */
+    private void resetWindowDimensionsToDefault(Context context) {
+        mBaseWidth = dp2px(context, DEFAULT_WIDTH_DP);
+        mBaseHeight = dp2px(context, DEFAULT_HEIGHT_DP);
 
-        ViewGroup.LayoutParams lp = mPrompterCard.getLayoutParams();
-        lp.width = savedW;
-        lp.height = savedH;
-        mPrompterCard.setLayoutParams(lp);
+        if (mPrompterCard != null) {
+            ViewGroup.LayoutParams lp = mPrompterCard.getLayoutParams();
+            lp.width = mBaseWidth;
+            lp.height = mBaseHeight;
+            mPrompterCard.setLayoutParams(lp);
+            mPrompterCard.setTranslationX(0f);
+            mPrompterCard.setTranslationY(0f);
+            mPrompterCard.setRotation(0f);
+        }
     }
 
-    private void saveWindowDimensions(Context context, int width, int height) {
-        SharedPreferences sp = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        sp.edit().putInt(KEY_WIDTH, width).putInt(KEY_HEIGHT, height).apply();
+    /**
+     * 一键复位悬浮窗尺寸、位置与旋转状态至纯净默认态 (防变形、防遮挡、防迷失)
+     */
+    public void resetWindowToDefaults(Activity activity) {
+        mCurrentRotation = 0f;
+        resetWindowDimensionsToDefault(activity);
+
+        if (mRotatableContainer != null) {
+            mRotatableContainer.setChildRotation(0f);
+        }
+
+        DisplayMetrics dm = activity.getResources().getDisplayMetrics();
+        int defaultX = (dm.widthPixels - mBaseWidth) / 2;
+        int defaultY = (int) (dm.heightPixels * 0.15f);
+
+        EasyFloat.updateFloat(FLOAT_TAG, defaultX, defaultY, mBaseWidth, mBaseHeight);
+
+        if (mRootFloatView != null) {
+            ImageView btnRotate = mRootFloatView.findViewById(R.id.btn_rotate);
+            if (btnRotate != null) {
+                btnRotate.setColorFilter(Color.WHITE);
+            }
+        }
+        Toast.makeText(activity, "视窗尺寸与位置已恢复默认居中", Toast.LENGTH_SHORT).show();
     }
 
     private void updateAlignmentIconUI(ImageView l, ImageView c, ImageView r, int mode) {
